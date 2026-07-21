@@ -123,3 +123,12 @@ STATICFILES_DIRS=(os.path.join(BASE_DIR,'LataExpress/static'),)
 MEDIA_URL='/media/'
 MEDIA_ROOT=(os.path.join(BASE_DIR,'LataExpress/media/'))
 
+##Email settings
+from decouple import config 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'jhoonn.guanoluisa@gmail.com'
+EMAIL_HOST_PASSWORD = 'byxnswmiwyahnyfe'  
+EMAIL_USE_TLS = True
+EMAIL_TIMEOUT = 10

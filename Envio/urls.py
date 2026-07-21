@@ -15,4 +15,5 @@ urlpatterns = [
     path('showencomiendas/',views.showencomiendas),
     path('eliminarencomienda/<int:id>/',views.eliminarencomienda),
     path('rastrear_encomienda/',views.rastrear_encomienda),
+    path('detalle_encomienda/<int:id>/', views.detalle_encomienda),
 ]

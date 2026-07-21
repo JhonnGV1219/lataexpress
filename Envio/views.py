@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Cliente, Destino, Encomienda
 ## Para añadir los alert bonitos 
 from django.contrib import messages
+from django.core.mail import EmailMessage
 
 # Create your views here.
 
@@ -18,6 +19,14 @@ def newencomienda(request):
     clientes = Cliente.objects.all()
     return render(request, 'newencomienda.html', {
         'clientes': clientes
+    })
+
+##Para ver detalle de la encomienda mas bonito
+def detalle_encomienda(request, id):
+    encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
+
+    return render(request, 'detalle_encomienda.html', {
+        'encomienda': encomienda
     })
 
 def guardar_Cliente(request):
@@ -78,10 +87,18 @@ def guardar_encomienda(request):
         codigo_postal=codigo_postal_f
     )
 
+    # -------- DESTINATARIO --------
+    nombre_destinatario_f = request.POST.get('nombre_destinatario')
+    cedula_destinatario_f = request.POST.get('cedula_destinatario')
+    email_destinatario_f = request.POST.get('email_destinatario')
+    telefono_destinatario_f = request.POST.get('telefono_destinatario')
+    direccion_destino_f = request.POST.get('direccion_destino')
+
     # -------- ENCOMIENDA --------
     descripcion_f = request.POST.get('descripcion')
     peso_f = request.POST.get('peso')
     precio_f = request.POST.get('precio')
+    estado_f = request.POST.get('estado')
     transporte_f = request.POST.get('transporte')
     fecha_estimada_f = request.POST.get('fecha_estimada')
 
@@ -91,13 +108,18 @@ def guardar_encomienda(request):
         descripcion=descripcion_f,
         peso=peso_f,
         precio=precio_f,
+        nombre_destinatario=nombre_destinatario_f,
+        cedula_destinatario=cedula_destinatario_f,
+        email_destinatario=email_destinatario_f,
+        telefono_destinatario=telefono_destinatario_f,
+        estado=estado_f,
         transporte=transporte_f,
         fecha_estimada=fecha_estimada_f
     )
+    enviar_correo_encomienda(encomienda_f)
 
     messages.success(request, f'Encomienda registrada correctamente para {cliente.nombre}')
     return redirect('/showencomiendas')
-
 
 
 def eliminarencomienda(request, id):
@@ -137,3 +159,54 @@ def rastrear_encomienda(request):
     })
 
 
+def enviar_correo_encomienda(encomienda):
+    mensaje = f"""
+    📦 DETALLE DE SU ENCOMIENDA
+
+    Código: {str(encomienda.codigo)}
+    Estado: {encomienda.get_estado_display()}
+
+    👤 Remitente:
+    {encomienda.cliente.nombre} {encomienda.cliente.apellido}
+
+    👤 Destinatario:
+    {encomienda.nombre_destinatario}
+    Teléfono: {encomienda.telefono_destinatario}
+    Correo: {encomienda.email_destinatario}
+
+    📍 Destino:
+    {encomienda.destino.ciudad}
+    {encomienda.destino.direccion}
+
+    🚚 Transporte:
+    {encomienda.get_transporte_display()}
+
+    📦 Descripción:
+    {encomienda.descripcion}
+
+    ⚖ Peso: {encomienda.peso} kg
+    💰 Precio: ${encomienda.precio}
+
+    📅 Fecha envío: {encomienda.fecha_envio}
+    📅 Fecha estimada: {encomienda.fecha_estimada}
+    """
+
+    email = EmailMessage(
+        subject='Detalle de su encomienda',
+        body=mensaje,
+        to=[encomienda.email_destinatario],
+    )
+
+    email.send()
+
+def enviar_encomienda_correo(request, id):
+    try:
+        encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
+    except Encomienda.DoesNotExist:
+        messages.error(request, "Encomienda no encontrada")
+        return redirect('/showencomiendas')
+
+    enviar_correo_encomienda(encomienda)
+
+    messages.success(request, f"Correo enviado a {encomienda.email_destinatario}")
+    return redirect('/showencomiendas')

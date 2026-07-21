@@ -51,11 +51,21 @@ class Encomienda(models.Model):
     peso = models.FloatField()
     precio = models.DecimalField(max_digits=8, decimal_places=2)
 
+    ##Destinatario
+    nombre_destinatario = models.CharField(max_length=150)
+    cedula_destinatario = models.CharField(max_length=10)
+    email_destinatario = models.EmailField()
+    telefono_destinatario = models.CharField(max_length=15)
+    
+
+
     # Logística
     estado = models.CharField(max_length=20, choices=ESTADOS, default='OFICINA')
     transporte = models.CharField(max_length=20, choices=TRANSPORTE)
     fecha_envio = models.DateTimeField(auto_now_add=True)
     fecha_estimada = models.DateTimeField()
+
+
 
     def __str__(self):
         return f"{self.codigo} - {self.estado}"

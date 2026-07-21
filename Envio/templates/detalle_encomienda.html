@@ -1,0 +1,138 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-1">Detalle de encomienda</h2>
+    <small class="text-muted badge-codigo" title="{{ encomienda.codigo }}"
+                              onclick="copiarCodigo('{{ encomienda.codigo }}')">
+                            LE-{{ encomienda.codigo|slice:":8"|upper }}
+    </small>
+
+    <div class="row mt-4">
+
+        <!-- INFORMACION -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">
+                    Información del envío
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Estado</strong><br>
+                            <span class="badge bg-primary">
+                                {{ encomienda.get_estado_display }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <strong>Fecha de registro</strong><br>
+                            {{ encomienda.fecha_envio }}
+                        </div>
+
+                        <div class="col-md-4">
+                            <strong>Fecha estimada</strong><br>
+                            {{ encomienda.fecha_estimada }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Cliente remitente</strong><br>
+                            {{ encomienda.cliente.nombre }} {{ encomienda.cliente.apellido }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Destinatario</strong><br>
+                            {{ encomienda.nombre_destinatario }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Ciudad destino</strong><br>
+                            {{ encomienda.destino.ciudad }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Dirección</strong><br>
+                            {{ encomienda.destino.direccion }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Teléfono</strong><br>
+                            {{ encomienda.telefono_destinatario }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Correo</strong><br>
+                            {{ encomienda.email_destinatario }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Transporte</strong><br>
+                            {{ encomienda.get_transporte_display }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Código postal</strong><br>
+                            {{ encomienda.destino.codigo_postal }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Descripción</strong><br>
+                            {{ encomienda.descripcion }}
+                        </div>
+
+                        <div class="col-md-2">
+                            <strong>Peso</strong><br>
+                            {{ encomienda.peso }} kg
+                        </div>
+
+                        <div class="col-md-3">
+                            <strong>Valor</strong><br>
+                            ${{ encomienda.precio }}
+                        </div>
+
+                        <div class="col-md-3">
+                            <strong>Costo</strong><br>
+                            ${{ encomienda.precio }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">
+                    Reportes y novedades
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No existen novedades registradas.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <a href="/showencomiendas" class="btn btn-secondary mt-3">← Volver</a>
+
+</div>
+
+{% endblock %}

@@ -14,6 +14,8 @@
         padding: 25px;
         border-radius: 12px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        width: 100%;
+        overflow-x: auto;
     }
 
     .btn-nuevo {
@@ -67,14 +69,6 @@
         font-size: 0.8rem;
         font-weight: 600;
     }
-    .contenedor-tabla {
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    width: 100%;
-    overflow-x: auto;
-}
 
     .badge-oficina { background-color: #6c757d; color: #fff; }
     .badge-transporte { background-color: #f0ad4e; color: #fff; }
@@ -101,6 +95,7 @@
                     <th>Código</th>
                     <th>Cliente</th>
                     <th>Destino</th>
+                    <th>Email</th>
                     <th>Descripción</th>
                     <th>Peso (kg)</th>
                     <th>Precio ($)</th>
@@ -123,6 +118,8 @@
                     </td>
                     <td>{{ encomienda.cliente.nombre }} {{ encomienda.cliente.apellido }}</td>
                     <td>{{ encomienda.destino.ciudad }} - {{ encomienda.destino.direccion }}</td>
+                    <td>{{ encomienda.cliente.email }}</td>
+
                     <td>{{ encomienda.descripcion|truncatechars:40 }}</td>
                     <td>{{ encomienda.peso }}</td>
                     <td>${{ encomienda.precio }}</td>
@@ -140,6 +137,12 @@
                     <td>{{ encomienda.fecha_estimada|date:"d/m/Y H:i" }}</td>
 
                     <td class="acciones">
+                        <a href="/detalle_encomienda/{{ encomienda.id }}"
+                           class="btn btn-danger btn-accion"
+                           title="Detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+
                         <a href="/editarencomienda/{{ encomienda.id }}"
                            class="btn btn-warning btn-accion" title="Editar">
                             <i class="bi bi-pencil"></i>

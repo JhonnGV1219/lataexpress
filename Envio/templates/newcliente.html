@@ -1,0 +1,121 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+
+        <div class="col-md-6">
+            <br>
+            <h1><b>Registrar de Cliente</b></h1>
+            <hr>
+
+            <form 
+                  action="/guardar_cliente/"
+                  method="post"
+                  id="form_nuevo_cliente">
+
+                {% csrf_token %}
+
+                <!-- Nombres -->
+                <b>Nombre:</b><br>
+                <input class="form-control" type="text" name="nombre" required>
+                <br>
+                <!-- Apellidos -->
+                <b>Apellido:</b><br>
+                <input class="form-control" type="text" name="apellido" required>
+                <br>
+
+                <!-- Cédula -->
+                <b>Cédula:</b><br>
+                <input class="form-control" type="text" name="cedula" required>
+                <br>
+
+                <!-- Email -->
+                <b>Email:</b><br>
+                <input class="form-control" type="email" name="email" required>
+                <br>
+
+                <!-- Teléfono -->
+                <b>Teléfono:</b><br>
+                <input class="form-control" type="text" name="telefono" required>
+                <br>
+                <br><br>
+
+                <!-- BOTONES -->
+                <div class="text-center">
+                    <button class="btn btn-success" type="submit">
+                        <i class="bi bi-plus-circle"></i> Guardar
+                    </button>
+
+                    <a href="/showclientes" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+            <br>
+        </div>
+    </div>
+</div>
+<script>
+    //validaciones para formularios
+$('#form_nuevo_cliente').validate(
+        {
+            rules:{
+                nombre:{
+                    required:true,
+                    minlength:3,
+                    maxlength:20
+                },
+                apellido:{
+                    required:true,
+                    minlengh:5,
+                    maxlength:20
+
+                },
+                cedula:{
+                    required:true,
+                    maxlength:10
+                },
+                email:{
+                    required:true,
+                    typeof:"email"
+                },
+                telefono:{
+                    required:true,
+                    maxlength:10
+                }
+            },
+            messages:{
+                nombre:{
+                    required:"Ingrese el nombre del cliente",
+                    minlength:"El nombre debe contener al menos 3 caracteres",
+                    maxlength:"El Nombre no debe sobrepasar 20 Caracteres"
+                },
+                apellido:{
+                    required:"Ingrese el apellido del cliente",
+                    minlength:"El apellido debe contener al menos 5 caracteres",
+                    maxlength:"El Apellido no debe sobrepasar 20 Caracteres"
+                },
+                cedula:{
+                    required:"Ingrese la cédula del cliente",
+                    maxlength:"No debe Exceder los 10 caracteres Ecuatorianos"
+                },
+                email:{
+                    required:"Ingrese el email del cliente",
+                    typeof:"Ingrese un email valido"
+                },
+                telefono:{
+                    required:"Ingrese el teléfono del cliente",
+                    maxlength:"No debe exceder los 10 caracteres Ecuatorianos"
+                }
+            }
+        }
+    );
+</script>
+
+
+{% endblock %}

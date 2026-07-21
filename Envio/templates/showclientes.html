@@ -1,0 +1,126 @@
+{% extends "./plantillaPrincipal.html" %}
+{% block contenido %}
+
+<style>
+    .titulo-clientes {
+        text-align: center;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .contenedor-tabla {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .btn-nuevo {
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+
+    table thead {
+        background-color: #289B38;
+        color: white;
+    }
+
+    table tbody tr:hover {
+        background-color: #f5f9f6;
+        transition: 0.3s;
+    }
+
+    table td, table th {
+        vertical-align: middle !important;
+        text-align: center;
+    }
+
+    .btn-accion {
+        border-radius: 50%;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .acciones {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Título -->
+    <h2 class="titulo-clientes">Clientes de LataExpress</h2>
+
+    <!-- Botón -->
+    <div class="text-center my-3">
+        <a class="btn btn-success btn-nuevo" href="/newcliente/">
+            <i class="bi bi-person-plus"></i> Nuevo Cliente
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div class="contenedor-tabla">
+        <table id="tbl_clientes" class="table table-borderless align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Cédula</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for cliente in misclientes %}
+                <tr>
+                    <td><strong>{{ cliente.id }}</strong></td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.apellido }}</td>
+                    <td>{{ cliente.cedula }}</td>
+                    <td>{{ cliente.telefono }}</td>
+                    <td>{{ cliente.email }}</td>
+
+                    <td class="acciones">
+                        <a href="/editarcliente/{{ cliente.id }}" 
+                           class="btn btn-warning btn-accion" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <a href="/eliminarcliente/{{ cliente.id }}" 
+                           class="btn btn-danger btn-accion"
+                           onclick="confirmarEliminacionCliente(event, this.href)" 
+                           title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    new DataTable('#tbl_clientes', {
+        responsive: true,
+        pageLength: 5,
+        dom: 'Blfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json"
+        }
+    });
+</script>
+
+{% endblock %}

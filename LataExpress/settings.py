@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'LataExpress.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': 'lataexpress.db',
     }
 }
 
@@ -116,3 +116,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+##AGERGAR ESTO 
+STATICFILES_DIRS=(os.path.join(BASE_DIR,'LataExpress/static'),)
+##Exportacion para la carpeta Media en donde se almacenaran las imagenes y documentos
+MEDIA_URL='/media/'
+MEDIA_ROOT=(os.path.join(BASE_DIR,'LataExpress/media/'))
+

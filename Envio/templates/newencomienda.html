@@ -1,0 +1,97 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+
+        <div class="col-md-6">
+            <br>
+            <h2><b>Registrar Encomienda</b></h2>
+            <hr>
+
+            <form action="/guardar_encomienda/" method="post">
+                {% csrf_token %}
+
+                <!-- CLIENTE -->
+                <label><b>Cliente:</b></label>
+                <select name="cliente" class="form-control" required>
+                    <option value="">Seleccione un cliente</option>
+                    {% for c in clientes %}
+                        <option value="{{ c.id }}">
+                            {{ c.nombre }} {{ c.apellido }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <br>
+
+                <!--  DESTINO va a crearse aqui -->
+                <label><b>Ciudad:</b></label>
+                <input type="text" name="ciudad" class="form-control" required>
+                <br>
+
+                <label><b>Dirección:</b></label>
+                <input type="text" name="direccion" class="form-control" required>
+                <br>
+
+                <label><b>Código Postal:</b></label>
+                <input type="text" name="codigo_postal" class="form-control" required>
+                <br>
+
+                <!-- DESCRIPCIÓN -->
+                <label><b>Descripción:</b></label>
+                <textarea name="descripcion" class="form-control" required></textarea>
+                <br>
+
+                <!-- PESO -->
+                <label><b>Peso (kg):</b></label>
+                <input type="number" step="0.01" name="peso" class="form-control" required>
+                <br>
+
+                <!-- PRECIO -->
+                <label><b>Precio ($):</b></label>
+                <input type="number" step="0.01" name="precio" class="form-control" required>
+                <br>
+
+                <!-- ESTADO -->
+                <label><b>Estado:</b></label>
+                <select name="estado" class="form-control">
+                    <option value="OFICINA">En oficina</option>
+                    <option value="TRANSPORTE">En transporte</option>
+                    <option value="ENTREGADO">Entregado</option>
+                </select>
+                <br>
+
+                <!-- TRANSPORTE -->
+                <label><b>Transporte:</b></label>
+                <select name="transporte" class="form-control" required>
+                    <option value="BUS">Bus</option>
+                    <option value="CAMIONETA">Camioneta</option>
+                    <option value="MOTO">Moto</option>
+                </select>
+                <br>
+
+                <!-- FECHA ESTIMADA -->
+                <label><b>Fecha estimada:</b></label>
+                <input type="datetime-local" name="fecha_estimada" class="form-control" required>
+                <br><br>
+
+                <!-- BOTONES -->
+                <div class="text-center">
+                    <button class="btn btn-success" type="submit">
+                        Guardar Encomienda
+                    </button>
+
+                    <a href="/showencomiendas/" class="btn btn-danger">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

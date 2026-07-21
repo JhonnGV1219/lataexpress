@@ -1,0 +1,185 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<style>
+    .card-rastreo {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .titulo-rastreo {
+        text-align: center;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .badge-estado-grande {
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-oficina { background-color: #6c757d; color: #fff; }
+    .badge-transporte { background-color: #f0ad4e; color: #fff; }
+    .badge-entregado { background-color: #28a745; color: #fff; }
+
+    .info-fila {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .info-fila b {
+        color: #2c3e50;
+    }
+
+    .timeline {
+        display: flex;
+        justify-content: space-between;
+        margin: 30px 0;
+        position: relative;
+    }
+
+    .timeline-paso {
+        text-align: center;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-circulo {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #ddd;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+    }
+
+    .timeline-circulo.activo {
+        background: #289B38;
+    }
+
+    .timeline-linea {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #ddd;
+        z-index: 1;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <h2 class="titulo-rastreo">Rastrea tu Encomienda</h2>
+
+    <div class="card-rastreo mb-4">
+        <form method="post" action="/rastrear_encomienda/">
+            {% csrf_token %}
+            <b>Ingresa tu código de seguimiento:</b><br>
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" name="codigo"
+                       placeholder="Ej: LE-A3F8B2C1" required
+                       value="{{ request.POST.codigo }}">
+                <button class="btn btn-success" type="submit">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if buscado %}
+        {% if encomienda %}
+        <div class="card-rastreo">
+
+            <div class="text-center mb-3">
+                {% if encomienda.estado == 'OFICINA' %}
+                    <span class="badge-estado-grande badge-oficina">En oficina</span>
+                {% elif encomienda.estado == 'TRANSPORTE' %}
+                    <span class="badge-estado-grande badge-transporte">En transporte</span>
+                {% elif encomienda.estado == 'ENTREGADO' %}
+                    <span class="badge-estado-grande badge-entregado">Entregado</span>
+                {% endif %}
+            </div>
+
+            <!-- Línea de tiempo simple -->
+            <div class="timeline">
+                <div class="timeline-linea"></div>
+                <div class="timeline-paso">
+                    <div class="timeline-circulo activo">
+                        <i class="bi bi-check"></i>
+                    </div>
+                    <small>En oficina</small>
+                </div>
+                <div class="timeline-paso">
+                    <div class="timeline-circulo {% if encomienda.estado == 'TRANSPORTE' or encomienda.estado == 'ENTREGADO' %}activo{% endif %}">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <small>En transporte</small>
+                </div>
+                <div class="timeline-paso">
+                    <div class="timeline-circulo {% if encomienda.estado == 'ENTREGADO' %}activo{% endif %}">
+                        <i class="bi bi-house-check"></i>
+                    </div>
+                    <small>Entregado</small>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="info-fila">
+                <span>Código</span>
+                <b>LE-{{ encomienda.codigo|slice:":8"|upper }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Destinatario</span>
+                <b>{{ encomienda.cliente.nombre }} {{ encomienda.cliente.apellido }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Destino</span>
+                <b>{{ encomienda.destino.ciudad }} - {{ encomienda.destino.direccion }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Descripción</span>
+                <b>{{ encomienda.descripcion }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Transporte</span>
+                <b>{{ encomienda.get_transporte_display }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Fecha de envío</span>
+                <b>{{ encomienda.fecha_envio|date:"d/m/Y H:i" }}</b>
+            </div>
+            <div class="info-fila">
+                <span>Fecha estimada de entrega</span>
+                <b>{{ encomienda.fecha_estimada|date:"d/m/Y H:i" }}</b>
+            </div>
+
+        </div>
+        {% else %}
+        <div class="card-rastreo text-center">
+            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+            <p class="mt-3 mb-0"><b>No se encontró ninguna encomienda con ese código.</b></p>
+            <small class="text-muted">Verifica que el código esté completo y correcto.</small>
+        </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+
+{% endblock %}

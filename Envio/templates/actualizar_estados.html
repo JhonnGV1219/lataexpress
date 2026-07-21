@@ -1,0 +1,111 @@
+{% extends "plantillaPrincipal.html" %}
+{% load static %}
+
+{% block contenido %}
+
+<div class="container mt-4 mb-5">
+    <h2 class="titulo-estados">Estados de encomiendas</h2>
+    <p class="text-center text-muted mb-4">Actualiza únicamente el estado de cada envío.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="contenedor-estados">
+        <table id="tbl_estados" class="table table-borderless align-middle tabla-estados" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Destino</th>
+                    <th>Estado actual</th>
+                    <th>Nuevo estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for encomienda in encomiendas %}
+                    <tr>
+                        <td><span class="badge-codigo">LE-{{ encomienda.codigo|slice:":8"|upper }}</span></td>
+                        <td>{{ encomienda.cliente.nombre }} {{ encomienda.cliente.apellido }}</td>
+                        <td>{{ encomienda.destino.ciudad }} - {{ encomienda.destino.direccion }}</td>
+                        <td>
+                            {% if encomienda.estado == 'OFICINA' %}
+                                <span class="badge-estado badge-oficina">En oficina</span>
+                            {% elif encomienda.estado == 'TRANSPORTE' %}
+                                <span class="badge-estado badge-transporte">En transporte</span>
+                            {% elif encomienda.estado == 'ENTREGADO' %}
+                                <span class="badge-estado badge-entregado">Entregado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="/actualizar_estados/" class="form-estado">
+                                {% csrf_token %}
+                                <input type="hidden" name="encomienda" value="{{ encomienda.id }}">
+                                <select name="estado" class="form-control" aria-label="Estado de la encomienda">
+                                    {% for valor, etiqueta in estados %}
+                                        <option value="{{ valor }}" {% if encomienda.estado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn-guardar">Guardar</button>
+                            </form>
+                        </td>
+                        <td><a href="/rastrear_encomienda/" class="btn-rastrear">Rastrear</a></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">No hay encomiendas registradas.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+    .titulo-estados 
+    { text-align: center; 
+        font-weight: 600;
+         color: #2c3e50; }
+    .contenedor-estados 
+    { background: #fff; 
+        padding: 25px; 
+        border-radius: 12px; 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+        width: 100%; 
+        overflow-x: auto; }
+    .tabla-estados { min-width: 850px; }
+    .tabla-estados thead { background-color: #289b38; color: #fff; }
+    .tabla-estados td, .tabla-estados th { vertical-align: middle; text-align: center; padding: 14px 10px; }
+    .tabla-estados tbody tr:hover { background-color: #f5f9f6; }
+    .badge-codigo { background-color: #2c3e50; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: .8rem; font-weight: 600; display: inline-block; max-width: 190px; overflow-wrap: anywhere; }
+    .badge-estado { padding: 6px 12px; border-radius: 20px; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+    .badge-oficina { background-color: #6c757d; color: #fff; }
+    .badge-transporte { background-color: #f0ad4e; color: #fff; }
+    .badge-entregado { background-color: #28a745; color: #fff; }
+    .form-estado { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 245px; }
+    .form-estado select { min-width: 145px; }
+    .btn-guardar, .btn-rastrear { border: 0; border-radius: 4px; color: #fff; padding: 10px 18px; font-size: .75rem; text-transform: uppercase; letter-spacing: .4px; }
+    .btn-guardar { background: #ff641f; }
+    .btn-rastrear { background: #ff641f; text-decoration: none; display: inline-block; }
+    .btn-guardar:hover, .btn-rastrear:hover { background: #e95312; color: #fff; }
+    @media (max-width: 767px) { .contenedor-estados { padding: 12px; } .form-estado { justify-content: flex-start; } }
+</style>
+
+<script>
+    new DataTable('#tbl_estados', {
+        responsive: false,
+        scrollX: true,
+        pageLength: 5,
+        dom: 'Blfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json'
+        }
+    });
+</script>
+
+{% endblock %}

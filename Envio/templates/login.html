@@ -1,0 +1,129 @@
+<!--  {% extends "./plantillaPrincipal.html" %} -->
+{% load static %} 
+
+<!-- {% block content %} -->
+
+<section class="ftco-section" style="
+    background-image: url('{% static 'login-form-20/login-form-20/images/fondo3.png' %}');background-size: cover;background-position: center;   background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+
+                <div class="login-wrap p-4 p-md-5" style="backdrop-filter: blur(12px);-webkit-backdrop-filter: blur(12px);border: 1px solid rgba(124, 118, 118, 0.15);
+                    border-radius: 20px;box-shadow: 0 8px 32px rgba(255, 255, 255, 0.45);color: white;"> 
+
+                    
+
+                    <h3 class="text-center mb-4"style="color:white;font-weight:bold;text-shadow:0 0 10px rgba(0,198,255,0.8);">
+                        Iniciar Sesión
+                    </h3>
+
+                    <!-- Mensajes -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form action="{% url 'login' %}" method="POST" class="signin-form">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <input type="text"name="username"class="form-control"placeholder="Usuario"required
+                                   style="background: rgba(255,255,255,0.10);border: 1px solid rgba(255,255,255,0.20);color: white;border-radius: 10px;">
+                        </div>
+                        <br>
+                        <div class="form-group position-relative">
+                            
+                            <input id="password-field"type="password"
+                                name="password"class="form-control"placeholder="Contraseña"required
+                                style="background: rgba(255,255,255,0.10);border: 1px solid rgba(255,255,255,0.20);color: white;
+                                border-radius: 10px;">
+
+                            <br> 
+                            <span toggle="#password-field"
+                                  class="fa fa-fw fa-eye field-icon toggle-password"
+                                  style="color:#00c6ff;cursor:pointer;position:absolute;right:15px;
+                                  top:15px;">
+                            </span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit"
+                                class="form-control btn rounded submit px-3"style="background: linear-gradient(135deg,#00c6ff,#0072ff);border:none;color:white;
+                                    font-weight:bold;
+                                    border-radius:10px;
+                                    box-shadow:0 0 15px rgba(0,114,255,0.5);">
+                                Iniciar Sesión
+                            </button>
+                        </div>
+
+                        <div class="form-group d-md-flex">
+                            <div class="w-50 text-left">
+                                <label class="checkbox-wrap checkbox-primary mb-0"
+                                       style="color:white;">
+                                    Recordarme
+                                    <input type="checkbox" name="remember" checked>
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<style>
+.form-control::placeholder{
+    color: rgba(255,255,255,0.7);
+}
+
+.form-control:focus{
+    background: rgba(255,255,255,0.15) !important;
+    color: white !important;
+    border-color: #00c6ff !important;
+    box-shadow: 0 0 10px rgba(0,198,255,0.5) !important;
+}
+
+.login-wrap:hover{
+    transform: translateY(-3px);
+    transition: 0.3s;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    $(".toggle-password").click(function() {
+        $(this).toggleClass("fa-eye fa-eye-slash");
+
+        var input = $($(this).attr("toggle"));
+
+        if (input.attr("type") == "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
+    });
+});
+</script>
+
+<!-- {% endblock %} -->
+
+
+

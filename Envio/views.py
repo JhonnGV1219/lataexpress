@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect
 from .models import Cliente, Destino, Encomienda
 ## Para añadir los alert bonitos 
 from django.contrib import messages
-from django.core.mail import EmailMessage
-
+from django.core.mail import send_mail
+from django.conf import settings
+from datetime import datetime
+from django.utils import timezone
 # Create your views here.
 
-# Create your models here.
 def inicio(request):
     #Presentando en pantalla el contenidp de
     return render(request, 'inicio.html')
@@ -19,14 +20,6 @@ def newencomienda(request):
     clientes = Cliente.objects.all()
     return render(request, 'newencomienda.html', {
         'clientes': clientes
-    })
-
-##Para ver detalle de la encomienda mas bonito
-def detalle_encomienda(request, id):
-    encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
-
-    return render(request, 'detalle_encomienda.html', {
-        'encomienda': encomienda
     })
 
 def guardar_Cliente(request):
@@ -76,29 +69,28 @@ def guardar_encomienda(request):
     cliente_id = request.POST.get('cliente')
     cliente = Cliente.objects.get(id=cliente_id)
 
-    # -------- DESTINO --------
+    # -------- DESTINO + DESTINATARIO --------
     ciudad_f = request.POST.get('ciudad')
     direccion_f = request.POST.get('direccion')
     codigo_postal_f = request.POST.get('codigo_postal')
-
-    destino_f = Destino.objects.create(
-        ciudad=ciudad_f,
-        direccion=direccion_f,
-        codigo_postal=codigo_postal_f
-    )
-
-    # -------- DESTINATARIO --------
     nombre_destinatario_f = request.POST.get('nombre_destinatario')
     cedula_destinatario_f = request.POST.get('cedula_destinatario')
     email_destinatario_f = request.POST.get('email_destinatario')
     telefono_destinatario_f = request.POST.get('telefono_destinatario')
-    direccion_destino_f = request.POST.get('direccion_destino')
 
+    destino_f = Destino.objects.create(
+        ciudad=ciudad_f,
+        direccion=direccion_f,
+        codigo_postal=codigo_postal_f,
+        nombre_destinatario=nombre_destinatario_f,
+        cedula_destinatario=cedula_destinatario_f,
+        email_destinatario=email_destinatario_f,
+        telefono_destinatario=telefono_destinatario_f
+    )
     # -------- ENCOMIENDA --------
     descripcion_f = request.POST.get('descripcion')
     peso_f = request.POST.get('peso')
     precio_f = request.POST.get('precio')
-    estado_f = request.POST.get('estado')
     transporte_f = request.POST.get('transporte')
     fecha_estimada_f = request.POST.get('fecha_estimada')
 
@@ -108,18 +100,13 @@ def guardar_encomienda(request):
         descripcion=descripcion_f,
         peso=peso_f,
         precio=precio_f,
-        nombre_destinatario=nombre_destinatario_f,
-        cedula_destinatario=cedula_destinatario_f,
-        email_destinatario=email_destinatario_f,
-        telefono_destinatario=telefono_destinatario_f,
-        estado=estado_f,
         transporte=transporte_f,
         fecha_estimada=fecha_estimada_f
     )
-    enviar_correo_encomienda(encomienda_f)
 
     messages.success(request, f'Encomienda registrada correctamente para {cliente.nombre}')
     return redirect('/showencomiendas')
+
 
 
 def eliminarencomienda(request, id):
@@ -159,54 +146,99 @@ def rastrear_encomienda(request):
     })
 
 
-def enviar_correo_encomienda(encomienda):
-    mensaje = f"""
-    📦 DETALLE DE SU ENCOMIENDA
+#Edición de Cliente
 
-    Código: {str(encomienda.codigo)}
-    Estado: {encomienda.get_estado_display()}
+def editcliente(request, id):
+    #Capturar el cliente a editar
+    cliente = Cliente.objects.get(id=id)
+    return render(request, 'editCliente.html', {
+        'cliente': cliente
+    })
 
-    👤 Remitente:
-    {encomienda.cliente.nombre} {encomienda.cliente.apellido}
+def actualizar_cliente(request, id):
+    cliente = Cliente.objects.get(id=id)
 
-    👤 Destinatario:
-    {encomienda.nombre_destinatario}
-    Teléfono: {encomienda.telefono_destinatario}
-    Correo: {encomienda.email_destinatario}
+    cliente.nombre = request.POST.get('nombre')
+    cliente.apellido = request.POST.get('apellido')
+    cliente.cedula = request.POST.get('cedula')
+    cliente.email = request.POST.get('email')
+    cliente.telefono = request.POST.get('telefono')
+    cliente.save()
 
-    📍 Destino:
-    {encomienda.destino.ciudad}
-    {encomienda.destino.direccion}
+    messages.success(request, f'{cliente.nombre} {cliente.apellido} ha sido actualizado correctamente')
+    return redirect('/showclientes')
 
-    🚚 Transporte:
-    {encomienda.get_transporte_display()}
 
-    📦 Descripción:
-    {encomienda.descripcion}
+# Edición de Encomienda
+def editencomienda(request, id):
+    #Capturar la encomienda a editar
+    encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
+    clientes = Cliente.objects.all()
 
-    ⚖ Peso: {encomienda.peso} kg
-    💰 Precio: ${encomienda.precio}
+    return render(request, 'editEncomienda.html', {
+        'encomienda': encomienda,
+        'clientes': clientes
+    })
 
-    📅 Fecha envío: {encomienda.fecha_envio}
-    📅 Fecha estimada: {encomienda.fecha_estimada}
-    """
+def actualizar_encomienda(request, id):
+    encomienda = Encomienda.objects.select_related('destino').get(id=id)
 
-    email = EmailMessage(
-        subject='Detalle de su encomienda',
-        body=mensaje,
-        to=[encomienda.email_destinatario],
+    #Cliente
+    cliente_id = request.POST.get('cliente')
+    cliente = Cliente.objects.get(id=cliente_id)
+
+    #Guardamos el email anterior antes de sobreescribirlo
+    email_anterior = encomienda.destino.email_destinatario
+    email_nuevo = request.POST.get('email_destinatario')
+
+    #Destino + Destinatario
+    encomienda.destino.ciudad = request.POST.get('ciudad')
+    encomienda.destino.direccion = request.POST.get('direccion')
+    encomienda.destino.codigo_postal = request.POST.get('codigo_postal')
+    encomienda.destino.nombre_destinatario = request.POST.get('nombre_destinatario')
+    encomienda.destino.cedula_destinatario = request.POST.get('cedula_destinatario')
+    encomienda.destino.email_destinatario = email_nuevo
+    encomienda.destino.telefono_destinatario = request.POST.get('telefono_destinatario')
+    encomienda.destino.save()
+
+    #Encomienda
+    encomienda.cliente = cliente
+    encomienda.descripcion = request.POST.get('descripcion')
+    encomienda.peso = request.POST.get('peso')
+    encomienda.precio = request.POST.get('precio')
+    encomienda.estado = request.POST.get('estado')
+    encomienda.transporte = request.POST.get('transporte')
+    fecha_estimada_str = request.POST.get('fecha_estimada')
+    fecha_estimada_dt = datetime.strptime(fecha_estimada_str, '%Y-%m-%dT%H:%M')
+    encomienda.fecha_estimada = timezone.make_aware(fecha_estimada_dt)
+    encomienda.save()
+
+    #Si el correo del destinatario cambió, le enviamos los datos actualizados
+    if email_nuevo and email_nuevo != email_anterior:
+        enviar_correo_actualizacion(encomienda)
+
+    messages.success(request, f'Encomienda actualizada correctamente para {cliente.nombre}')
+    return redirect('/showencomiendas')
+
+def enviar_correo_actualizacion(encomienda):
+    asunto = f'Actualización de tu envío LE-{str(encomienda.codigo)[:8].upper()}'
+    mensaje = (
+        f'Hola {encomienda.destino.nombre_destinatario},\n\n'
+        f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
+        f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+        f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
+        f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+        f'Descripción: {encomienda.descripcion}\n'
+        f'Estado actual: {encomienda.get_estado_display()}\n'
+        f'Fecha estimada de entrega: {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+        f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+        f'Saludos,\nEquipo LataExpress'
     )
 
-    email.send()
-
-def enviar_encomienda_correo(request, id):
-    try:
-        encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
-    except Encomienda.DoesNotExist:
-        messages.error(request, "Encomienda no encontrada")
-        return redirect('/showencomiendas')
-
-    enviar_correo_encomienda(encomienda)
-
-    messages.success(request, f"Correo enviado a {encomienda.email_destinatario}")
-    return redirect('/showencomiendas')
+    send_mail(
+        asunto,
+        mensaje,
+        settings.DEFAULT_FROM_EMAIL,
+        [encomienda.destino.email_destinatario],
+        fail_silently=False,
+    )

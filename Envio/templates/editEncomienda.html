@@ -1,0 +1,158 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+
+            <h2 class="fw-bold text-center mb-1">Editar Encomienda</h2>
+            <p class="text-muted text-center mb-4">Actualiza los datos del envío</p>
+
+            <form action="/actualizar_encomienda/{{ encomienda.id }}/" method="post">
+                {% csrf_token %}
+
+                <!-- ===== CLIENTE ===== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <b><i class="bi bi-person-fill"></i> Cliente</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label"><b>Cliente</b></label>
+                                <select name="cliente" class="form-select" required>
+                                    <option value="">Seleccione un cliente</option>
+                                    {% for c in clientes %}
+                                        <option value="{{ c.id }}" {% if c.id == encomienda.cliente.id %}selected{% endif %}>
+                                            {{ c.nombre }} {{ c.apellido }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== DESTINO ===== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <b><i class="bi bi-geo-alt-fill"></i> Destino</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Ciudad</b></label>
+                                <input type="text" name="ciudad" class="form-control" value="{{ encomienda.destino.ciudad }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Código Postal</b></label>
+                                <input type="text" name="codigo_postal" class="form-control" value="{{ encomienda.destino.codigo_postal }}" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label"><b>Dirección</b></label>
+                                <input type="text" name="direccion" class="form-control" value="{{ encomienda.destino.direccion }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== DESTINATARIO ===== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <b><i class="bi bi-person-badge-fill"></i> Destinatario</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Nombre completo</b></label>
+                                <input type="text" name="nombre_destinatario" class="form-control" value="{{ encomienda.destino.nombre_destinatario }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Cédula</b></label>
+                                <input type="text" name="cedula_destinatario" maxlength="10" class="form-control" value="{{ encomienda.destino.cedula_destinatario }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Email</b></label>
+                                <input type="email" name="email_destinatario" class="form-control" value="{{ encomienda.destino.email_destinatario }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Teléfono</b></label>
+                                <input type="text" name="telefono_destinatario" maxlength="15" class="form-control" value="{{ encomienda.destino.telefono_destinatario }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAQUETE ===== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <b><i class="bi bi-box-seam-fill"></i> Datos del paquete</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label"><b>Descripción</b></label>
+                                <textarea name="descripcion" class="form-control" rows="2" required>{{ encomienda.descripcion }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Peso (kg)</b></label>
+                                <input type="number" step="0.01" name="peso" class="form-control" value="{{ encomienda.peso }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><b>Precio ($)</b></label>
+                                <input type="number" step="0.01" name="precio" class="form-control" value="{{ encomienda.precio }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== LOGÍSTICA ===== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <b><i class="bi bi-truck"></i> Logística</b>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label"><b>Estado</b></label>
+                                <select name="estado" class="form-select">
+                                    <option value="OFICINA" {% if encomienda.estado == "OFICINA" %}selected{% endif %}>En oficina</option>
+                                    <option value="TRANSPORTE" {% if encomienda.estado == "TRANSPORTE" %}selected{% endif %}>En transporte</option>
+                                    <option value="ENTREGADO" {% if encomienda.estado == "ENTREGADO" %}selected{% endif %}>Entregado</option>
+                                </select>
+                            </div>  
+                            <div class="col-md-4">
+                                <label class="form-label"><b>Transporte</b></label>
+                                <select name="transporte" class="form-select" required>
+                                    <option value="BUS" {% if encomienda.transporte == "BUS" %}selected{% endif %}>Bus</option>
+                                    <option value="CAMIONETA" {% if encomienda.transporte == "CAMIONETA" %}selected{% endif %}>Camioneta</option>
+                                    <option value="MOTO" {% if encomienda.transporte == "MOTO" %}selected{% endif %}>Moto</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><b>Fecha estimada</b></label>
+                                <input type="datetime-local" name="fecha_estimada" class="form-control" value="{{ encomienda.fecha_estimada|date:'Y-m-d\TH:i' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="text-center mb-4">
+                    <button class="btn btn-success px-4" type="submit">
+                        <i class="bi bi-save-fill"></i> Actualizar Encomienda
+                    </button>
+
+                    <a href="/showencomiendas/" class="btn btn-outline-danger px-4">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

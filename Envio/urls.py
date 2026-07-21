@@ -15,5 +15,8 @@ urlpatterns = [
     path('showencomiendas/',views.showencomiendas),
     path('eliminarencomienda/<int:id>/',views.eliminarencomienda),
     path('rastrear_encomienda/',views.rastrear_encomienda),
-    path('detalle_encomienda/<int:id>/', views.detalle_encomienda),
+    path('editcliente/<int:id>', views.editcliente),
+    path('actualizar_cliente/<int:id>/', views.actualizar_cliente),
+    path('editencomienda/<int:id>', views.editencomienda),
+    path('actualizar_encomienda/<int:id>/', views.actualizar_encomienda),
 ]

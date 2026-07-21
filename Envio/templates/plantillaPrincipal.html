@@ -150,11 +150,36 @@
                                         <ul id="navigation">                                                                                          
                                             <li><a href="/">Home</a></li>
                                             <li><a href="#">About</a></li>
-                                            <li><a href="/showclientes/">Asociados</a></li>
+                                            {% if user.is_authenticated %}
+                                                {% if user.is_superuser %}
+                                                    <li><a href="/showclientes/">Asociados</a></li>
+                                                {% else %}
+                                                    {% for group in user.groups.all %}
+                                                        {% if group.name == 'admin' %}
+                                                            <li><a href="/showclientes/">Asociados</a></li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endif %}
                                             <li><a href="#">Encomiendas</a>
                                                 <ul class="submenu">
-                                                    <li><a href="/showencomiendas/">Encomiendas pila</a></li>
-                                                    <li><a href="/rastrear_encomienda/">Rastrear Encomienda</a></li>
+                                                    {% if user.is_superuser %}
+                                                        <li><a href="/showencomiendas/">Encomiendas</a></li>
+                                                    {% else %}
+                                                        {% for group in user.groups.all %}
+                                                            {% if group.name == 'admin' %}
+                                                                <li><a href="/showencomiendas/">Encomiendas</a></li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                    <li><a href="/rastrear_encomienda/">Rastrear encomienda</a></li>
+                                                    {% if user.is_authenticated and not user.is_superuser %}
+                                                        {% for group in user.groups.all %}
+                                                            {% if group.name == 'transportista' %}
+                                                                <li><a href="/actualizar_estados/">Actualizar estados</a></li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
                                                 </ul>
                                             </li>
                                             <li><a href="contact.html">Contact</a></li>
@@ -163,7 +188,11 @@
                                 </div>
                                 <!-- Header-btn -->
                                 <div class="header-right-btn d-none d-lg-block ml-20">
-                                    <a href="login.html" class="btn header-btn">Iniciar Sesión  </a>
+                                    {% if user.is_authenticated %}
+                                        <a href="/logout/" class="btn header-btn">Cerrar Sesión</a>
+                                    {% else %}
+                                        <a href="/login/" class="btn header-btn">Iniciar Sesión</a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div> 

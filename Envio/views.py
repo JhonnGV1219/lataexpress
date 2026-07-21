@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Cliente, Destino, Encomienda
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import user_passes_test
 ## Para añadir los alert bonitos 
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -8,20 +10,73 @@ from datetime import datetime
 from django.utils import timezone
 # Create your views here.
 
+
+def es_admin(user):
+    return user.is_authenticated and (
+        user.is_superuser or user.groups.filter(name='admin').exists()
+    )
+
+
+def es_transportista(user):
+    return user.is_authenticated and user.groups.filter(name='transportista').exists()
+
+
+def requiere_admin(view_func):
+    return user_passes_test(es_admin, login_url='/login/')(view_func)
+
+
+def requiere_admin_o_transportista(view_func):
+    return user_passes_test(
+        lambda user: es_admin(user) or es_transportista(user),
+        login_url='/login/'
+    )(view_func)
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redireccion_por_rol(request.user)
+
+    if request.method == 'POST':
+        usuario = authenticate(
+            request,
+            username=request.POST.get('username'),
+            password=request.POST.get('password')
+        )
+        if usuario is not None:
+            login(request, usuario)
+            return redireccion_por_rol(usuario)
+        messages.error(request, 'Usuario o contraseña incorrectos.')
+
+    return render(request, 'login.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('/login/')
+
+
+def redireccion_por_rol(user):
+    if es_transportista(user) and not es_admin(user):
+        return redirect('/actualizar_estados/')
+    return redirect('/showclientes/')
+
 def inicio(request):
     #Presentando en pantalla el contenidp de
     return render(request, 'inicio.html')
 
 
+@requiere_admin
 def newcliente(request):
     return render(request, 'newcliente.html')
 
+@requiere_admin
 def newencomienda(request):
     clientes = Cliente.objects.all()
     return render(request, 'newencomienda.html', {
         'clientes': clientes
     })
 
+@requiere_admin
 def guardar_Cliente(request):
     nombre_f=request.POST.get('nombre')
     apellido_f=request.POST.get('apellido')
@@ -38,11 +93,13 @@ def guardar_Cliente(request):
     messages.success(request ,f'{cliente_f.nombre } {cliente_f.apellido} ha sido ingresado al sistema correctamente')
     return redirect('/showclientes')
 
+@requiere_admin
 def showclientes(request):
     clientes=Cliente.objects.all()
     return render(request, 'showclientes.html',
                   {'misclientes':clientes})
 
+@requiere_admin
 def eliminarcliente(request,id):
     ##Capturar el ID
     #El primer parametro id es el de la BDD
@@ -57,6 +114,7 @@ def eliminarcliente(request,id):
 
 ## Encomiendas y Destinos
 
+@requiere_admin
 def showencomiendas(request):
     encomiendas = Encomienda.objects.select_related('cliente', 'destino').all().order_by('-fecha_envio')
 
@@ -64,6 +122,7 @@ def showencomiendas(request):
         'encomiendas': encomiendas
     })
 
+@requiere_admin
 def guardar_encomienda(request):
     # -------- CLIENTE --------
     cliente_id = request.POST.get('cliente')
@@ -109,6 +168,7 @@ def guardar_encomienda(request):
 
 
 
+@requiere_admin
 def eliminarencomienda(request, id):
     encomienda = Encomienda.objects.get(id=id)
     encomienda.delete()
@@ -148,6 +208,7 @@ def rastrear_encomienda(request):
 
 #Edición de Cliente
 
+@requiere_admin
 def editcliente(request, id):
     #Capturar el cliente a editar
     cliente = Cliente.objects.get(id=id)
@@ -155,6 +216,7 @@ def editcliente(request, id):
         'cliente': cliente
     })
 
+@requiere_admin
 def actualizar_cliente(request, id):
     cliente = Cliente.objects.get(id=id)
 
@@ -170,6 +232,7 @@ def actualizar_cliente(request, id):
 
 
 # Edición de Encomienda
+@requiere_admin
 def editencomienda(request, id):
     #Capturar la encomienda a editar
     encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
@@ -180,6 +243,7 @@ def editencomienda(request, id):
         'clientes': clientes
     })
 
+@requiere_admin
 def actualizar_encomienda(request, id):
     encomienda = Encomienda.objects.select_related('destino').get(id=id)
 
@@ -219,6 +283,30 @@ def actualizar_encomienda(request, id):
 
     messages.success(request, f'Encomienda actualizada correctamente para {cliente.nombre}')
     return redirect('/showencomiendas')
+
+
+@requiere_admin_o_transportista
+def actualizar_estados(request):
+    encomiendas = Encomienda.objects.select_related('cliente', 'destino').all().order_by('-fecha_envio')
+
+    if request.method == 'POST':
+        encomienda_id = request.POST.get('encomienda')
+        nuevo_estado = request.POST.get('estado')
+        estados_validos = {valor for valor, _ in Encomienda.ESTADOS}
+
+        if nuevo_estado not in estados_validos:
+            messages.error(request, 'El estado seleccionado no es válido.')
+        else:
+            encomienda = Encomienda.objects.get(id=encomienda_id)
+            encomienda.estado = nuevo_estado
+            encomienda.save(update_fields=['estado'])
+            messages.success(request, 'Estado de la encomienda actualizado correctamente.')
+            return redirect('/actualizar_estados/')
+
+    return render(request, 'actualizar_estados.html', {
+        'encomiendas': encomiendas,
+        'estados': Encomienda.ESTADOS,
+    })
 
 def enviar_correo_actualizacion(encomienda):
     asunto = f'Actualización de tu envío LE-{str(encomienda.codigo)[:8].upper()}'

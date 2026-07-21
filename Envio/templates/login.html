@@ -1,25 +1,19 @@
-<!--  {% extends "./plantillaPrincipal.html" %} -->
+{% extends "./plantillaPrincipal.html" %}
 {% load static %} 
 
-<!-- {% block content %} -->
+{% block contenido %}
 
-<section class="ftco-section" style="
-    background-image: url('{% static 'login-form-20/login-form-20/images/fondo3.png' %}');background-size: cover;background-position: center;   background-repeat: no-repeat;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;">
+<section class="login-page" style="background-image: url('{% static 'login-form-20/login-form-20/images/login12.png' %}');">
 
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
 
-                <div class="login-wrap p-4 p-md-5" style="backdrop-filter: blur(12px);-webkit-backdrop-filter: blur(12px);border: 1px solid rgba(124, 118, 118, 0.15);
-                    border-radius: 20px;box-shadow: 0 8px 32px rgba(255, 255, 255, 0.45);color: white;"> 
+                <div class="login-wrap p-4 p-md-5">
 
                     
 
-                    <h3 class="text-center mb-4"style="color:white;font-weight:bold;text-shadow:0 0 10px rgba(0,198,255,0.8);">
+                    <h3 class="text-center mb-4 login-title">
                         Iniciar Sesión
                     </h3>
 
@@ -35,35 +29,25 @@
                         {% endfor %}
                     {% endif %}
 
-                    <form action="{% url 'login' %}" method="POST" class="signin-form">
+                    <form action="/login/" method="POST" class="signin-form">
                         {% csrf_token %}
 
                         <div class="form-group">
-                            <input type="text"name="username"class="form-control"placeholder="Usuario"required
-                                   style="background: rgba(255,255,255,0.10);border: 1px solid rgba(255,255,255,0.20);color: white;border-radius: 10px;">
+                            <label for="username">Usuario</label>
+                            <input id="username" type="text" name="username" class="form-control" placeholder="Ingresa tu usuario" required>
                         </div>
-                        <br>
-                        <div class="form-group position-relative">
-                            
-                            <input id="password-field"type="password"
-                                name="password"class="form-control"placeholder="Contraseña"required
-                                style="background: rgba(255,255,255,0.10);border: 1px solid rgba(255,255,255,0.20);color: white;
-                                border-radius: 10px;">
 
-                            <br> 
+                        <div class="form-group position-relative">
+                            <label for="password-field">Contraseña</label>
+                            <input id="password-field" type="password" name="password" class="form-control" placeholder="Ingresa tu contraseña" required>
                             <span toggle="#password-field"
                                   class="fa fa-fw fa-eye field-icon toggle-password"
-                                  style="color:#00c6ff;cursor:pointer;position:absolute;right:15px;
-                                  top:15px;">
+                                  aria-label="Mostrar contraseña">
                             </span>
                         </div>
 
                         <div class="form-group">
-                            <button type="submit"
-                                class="form-control btn rounded submit px-3"style="background: linear-gradient(135deg,#00c6ff,#0072ff);border:none;color:white;
-                                    font-weight:bold;
-                                    border-radius:10px;
-                                    box-shadow:0 0 15px rgba(0,114,255,0.5);">
+                            <button type="submit" class="form-control btn submit px-3">
                                 Iniciar Sesión
                             </button>
                         </div>
@@ -90,20 +74,117 @@
 </section>
 
 <style>
-.form-control::placeholder{
-    color: rgba(255,255,255,0.7);
+.login-page {
+    position: relative;
+    min-height: calc(100vh - 132px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 15px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.form-control:focus{
-    background: rgba(255,255,255,0.15) !important;
-    color: white !important;
-    border-color: #00c6ff !important;
-    box-shadow: 0 0 10px rgba(0,198,255,0.5) !important;
+body:has(.login-page) footer {
+    display: none;
 }
 
-.login-wrap:hover{
-    transform: translateY(-3px);
-    transition: 0.3s;
+.login-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(106, 107, 109, 0.42);
+}
+
+.login-page .container,
+.login-page .row,
+.login-page .col-md-6 {
+    position: relative;
+    z-index: 1;
+}
+
+.login-wrap {
+    width: 100%;
+    max-width: 410px;
+    background: rgba(7, 19, 36, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    color: #fff;
+}
+
+.login-title {
+    color: #fff;
+    font-size: 1.7rem;
+    font-weight: 700;
+    text-shadow: 0 2px 12px rgba(0, 198, 255, 0.65);
+}
+
+.login-wrap label {
+    display: block;
+    margin-bottom: 7px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.login-wrap .form-group {
+    margin-bottom: 22px;
+}
+
+.login-wrap .form-control {
+    height: 48px;
+    padding: 10px 44px 10px 14px;
+    background: #fff !important;
+    border: 2px solid #d7e1ea;
+    border-radius: 8px;
+    color: #172b4d !important;
+    font-size: 0.95rem;
+}
+
+.login-wrap .form-control::placeholder {
+    color: #728096;
+    opacity: 1;
+}
+
+.login-wrap .form-control:focus {
+    border-color: #00aeea;
+    box-shadow: 0 0 0 3px rgba(0, 174, 234, 0.25) !important;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 40px;
+    color: #007fae;
+    cursor: pointer;
+}
+
+.login-wrap .submit {
+    height: 48px;
+    background: linear-gradient(135deg, #00aeea, #006de5);
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(0, 109, 229, 0.35);
+}
+
+.login-wrap .submit:hover {
+    background: linear-gradient(135deg, #0097cc, #005bc2);
+}
+
+.login-wrap .checkbox-wrap {
+    color: #fff;
+    font-weight: 400;
+}
+
+@media (max-width: 767px) {
+    .login-page {
+        min-height: calc(100vh - 104px);
+        padding: 45px 15px;
+    }
 }
 </style>
 
@@ -123,7 +204,7 @@ $(document).ready(function() {
 });
 </script>
 
-<!-- {% endblock %} -->
+{% endblock %}
 
 
 

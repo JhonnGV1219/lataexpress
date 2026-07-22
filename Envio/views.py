@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
+from django.core.mail import EmailMessage
 # Create your views here.
 
 
@@ -74,6 +75,13 @@ def newencomienda(request):
     clientes = Cliente.objects.all()
     return render(request, 'newencomienda.html', {
         'clientes': clientes
+    })
+##Para ver detalle de la encomienda mas bonito
+def detalle_encomienda(request, id):
+    encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
+
+    return render(request, 'detalle_encomienda.html', {
+        'encomienda': encomienda
     })
 
 @requiere_admin
@@ -150,6 +158,7 @@ def guardar_encomienda(request):
     descripcion_f = request.POST.get('descripcion')
     peso_f = request.POST.get('peso')
     precio_f = request.POST.get('precio')
+    estado_f = request.POST.get('estado')
     transporte_f = request.POST.get('transporte')
     fecha_estimada_f = request.POST.get('fecha_estimada')
 
@@ -159,15 +168,62 @@ def guardar_encomienda(request):
         descripcion=descripcion_f,
         peso=peso_f,
         precio=precio_f,
+        nombre_destinatario=nombre_destinatario_f,
+        cedula_destinatario=cedula_destinatario_f,
+        email_destinatario=email_destinatario_f,
+        telefono_destinatario=telefono_destinatario_f,
+        estado=estado_f,
         transporte=transporte_f,
         fecha_estimada=fecha_estimada_f
     )
-
+    enviar_correo_encomienda(encomienda_f)
     messages.success(request, f'Encomienda registrada correctamente para {cliente.nombre}')
     return redirect('/showencomiendas')
 
 
+def enviar_correo_encomienda(encomienda):
 
+    fecha_estimada = encomienda.fecha_estimada
+
+    # 🔧 Convertir si viene como string
+    if isinstance(fecha_estimada, str):
+        try:
+            fecha_estimada = datetime.fromisoformat(fecha_estimada)
+        except:
+            fecha_estimada = datetime.strptime(fecha_estimada, "%Y-%m-%d %H:%M:%S")
+
+    mensaje = (
+        f'Hola {encomienda.nombre_destinatario},\n\n'
+        f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
+        f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+        f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
+        f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+        f'Descripción: {encomienda.descripcion}\n'
+        f'Estado actual: {encomienda.get_estado_display()}\n'
+        f'Fecha estimada de entrega: {fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+        f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+        f'Saludos,\nEquipo LataExpress'
+    )
+
+    email = EmailMessage(
+        subject='Detalle de su encomienda',
+        body=mensaje,
+        to=[encomienda.email_destinatario],
+    )
+
+    email.send()
+
+def enviar_encomienda_correo(request, id):
+    try:
+        encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
+    except Encomienda.DoesNotExist:
+        messages.error(request, "Encomienda no encontrada")
+        return redirect('/showencomiendas')
+
+    enviar_correo_encomienda(encomienda)
+
+    messages.success(request, f"Correo enviado a {encomienda.email_destinatario}")
+    return redirect('/showencomiendas')
 @requiere_admin
 def eliminarencomienda(request, id):
     encomienda = Encomienda.objects.get(id=id)
@@ -309,7 +365,7 @@ def actualizar_estados(request):
     })
 
 def enviar_correo_actualizacion(encomienda):
-    asunto = f'Actualización de tu envío LE-{str(encomienda.codigo)[:8].upper()}'
+    asunto = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
     mensaje = (
         f'Hola {encomienda.destino.nombre_destinatario},\n\n'
         f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'

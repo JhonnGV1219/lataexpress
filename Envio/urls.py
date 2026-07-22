@@ -12,6 +12,7 @@ urlpatterns = [
     path('guardar_cliente/', views.guardar_Cliente),
     path('showclientes/', views.showclientes),
     path('eliminarcliente/<int:id>/', views.eliminarcliente),
+    path('detalle_encomienda/<int:id>/', views.detalle_encomienda),
     path('guardar_encomienda/', views.guardar_encomienda),
     path('newencomienda/', views.newencomienda),
     path('showencomiendas/', views.showencomiendas),

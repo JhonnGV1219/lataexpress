@@ -2,6 +2,7 @@ from django.db import models
 ##Libreria para generar codigos mediante los datos del cliente y destino 
 import uuid
 
+
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)
     apellido= models.CharField(max_length=100)
@@ -49,6 +50,12 @@ class Encomienda(models.Model):
     descripcion = models.TextField()
     peso = models.FloatField()
     precio = models.DecimalField(max_digits=8, decimal_places=2)
+    ##Destinatario
+    nombre_destinatario = models.CharField(max_length=150)
+    cedula_destinatario = models.CharField(max_length=10)
+    email_destinatario = models.EmailField()
+    telefono_destinatario = models.CharField(max_length=15)
+    
 
     estado = models.CharField(max_length=20, choices=ESTADOS, default='OFICINA')
     transporte = models.CharField(max_length=20, choices=TRANSPORTE)

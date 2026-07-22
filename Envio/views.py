@@ -11,6 +11,10 @@ from django.utils import timezone
 from django.core.mail import EmailMessage
 # Create your views here.
 
+##Nuevas Librerias para el dashboard
+##Importaciones para gestionar el Dashboard
+from django.db.models import Sum, Count, Avg
+
 
 def es_admin(user):
     return user.is_authenticated and (
@@ -83,6 +87,13 @@ def detalle_encomienda(request, id):
     return render(request, 'detalle_encomienda.html', {
         'encomienda': encomienda
     })
+
+@requiere_admin
+def dashboard(request):
+    ##KPI1
+    ##Total de inventario por categoria
+    return render(request, 'dashboard.html')
+
 
 @requiere_admin
 def guardar_Cliente(request):

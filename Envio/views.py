@@ -333,9 +333,8 @@ def actualizar_encomienda(request, id):
     encomienda.fecha_estimada = timezone.make_aware(fecha_estimada_dt)
     encomienda.save()
 
-    #Si el correo del destinatario cambió, le enviamos los datos actualizados
-    if email_nuevo and email_nuevo != email_anterior:
-        enviar_correo_actualizacion(encomienda)
+    #Se actualiza
+    enviar_correo_actualizacion(encomienda)
 
     messages.success(request, f'Encomienda actualizada correctamente para {cliente.nombre}')
     return redirect('/showencomiendas')

@@ -191,27 +191,47 @@ def enviar_correo_encomienda(encomienda):
             fecha_estimada = datetime.fromisoformat(fecha_estimada)
         except:
             fecha_estimada = datetime.strptime(fecha_estimada, "%Y-%m-%d %H:%M:%S")
+    # -------- Correo para el CLIENTE (remitente) --------
+    if encomienda.cliente.email:
+        mensaje_cliente = (
+            f'Hola {encomienda.cliente.nombre} {encomienda.cliente.apellido},\n\n'
+            f'Tu encomienda ha sido registrada exitosamente en LataExpress.\n\n'
+            f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+            f'Destinatario: {encomienda.destino.nombre_destinatario}\n'
+            f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+            f'Descripción: {encomienda.descripcion}\n'
+            f'Estado actual: {encomienda.get_estado_display()}\n'
+            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+            f'Saludos,\nEquipo LataExpress'
+        )
 
-    mensaje = (
-        f'Hola {encomienda.nombre_destinatario},\n\n'
-        f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
-        f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
-        f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
-        f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
-        f'Descripción: {encomienda.descripcion}\n'
-        f'Estado actual: {encomienda.get_estado_display()}\n'
-        f'Fecha estimada de entrega: {fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
-        f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
-        f'Saludos,\nEquipo LataExpress'
-    )
+        EmailMessage(
+            subject='Tu encomienda ha sido registrada',
+            body=mensaje_cliente,
+            to=[encomienda.cliente.email],
+        ).send()
 
-    email = EmailMessage(
-        subject='Detalle de su encomienda',
-        body=mensaje,
-        to=[encomienda.email_destinatario],
-    )
+    # -------- Correo para el DESTINATARIO --------
+    if encomienda.destino.email_destinatario:
+        mensaje_destinatario = (
+            f'Hola {encomienda.destino.nombre_destinatario},\n\n'
+            f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
+            f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+            f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
+            f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+            f'Descripción: {encomienda.descripcion}\n'
+            f'Estado actual: {encomienda.get_estado_display()}\n'
+            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+            f'Saludos,\nEquipo LataExpress'
+        )
 
-    email.send()
+        EmailMessage(
+            subject='Detalle de su encomienda',
+            body=mensaje_destinatario,
+            to=[encomienda.destino.email_destinatario],
+        ).send()
 
 def enviar_encomienda_correo(request, id):
     try:
@@ -364,24 +384,52 @@ def actualizar_estados(request):
     })
 
 def enviar_correo_actualizacion(encomienda):
-    asunto = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
-    mensaje = (
-        f'Hola {encomienda.destino.nombre_destinatario},\n\n'
-        f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
-        f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
-        f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
-        f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
-        f'Descripción: {encomienda.descripcion}\n'
-        f'Estado actual: {encomienda.get_estado_display()}\n'
-        f'Fecha estimada de entrega: {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
-        f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
-        f'Saludos,\nEquipo LataExpress'
-    )
 
-    send_mail(
-        asunto,
-        mensaje,
-        settings.DEFAULT_FROM_EMAIL,
-        [encomienda.destino.email_destinatario],
-        fail_silently=False,
-    )
+
+    # -------- Correo para el CLIENTE (remitente) --------
+    if encomienda.cliente.email:
+        asunto_cliente = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
+        mensaje_cliente = (
+            f'Hola {encomienda.cliente.nombre} {encomienda.cliente.apellido},\n\n'
+            f'Tu encomienda ha sido actualizada.\n\n'
+            f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+            f'Destinatario: {encomienda.destino.nombre_destinatario}\n'
+            f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+            f'Descripción: {encomienda.descripcion}\n'
+            f'Estado actual: {encomienda.get_estado_display()}\n'
+            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+            f'Saludos,\nEquipo LataExpress'
+        )
+
+        send_mail(
+            asunto_cliente,
+            mensaje_cliente,
+            settings.DEFAULT_FROM_EMAIL,
+            [encomienda.cliente.email],
+            fail_silently=False,
+        )
+
+    # -------- Correo para el DESTINATARIO --------
+    if encomienda.destino.email_destinatario:
+        asunto_destinatario = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
+        mensaje_destinatario = (
+            f'Hola {encomienda.destino.nombre_destinatario},\n\n'
+            f'Se ha actualizado la encomienda de la cual eres destinatario en LataExpress.\n\n'
+            f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
+            f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
+            f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
+            f'Descripción: {encomienda.descripcion}\n'
+            f'Estado actual: {encomienda.get_estado_display()}\n'
+            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
+            f'Saludos,\nEquipo LataExpress'
+        )
+
+        send_mail(
+            asunto_destinatario,
+            mensaje_destinatario,
+            settings.DEFAULT_FROM_EMAIL,
+            [encomienda.destino.email_destinatario],
+            fail_silently=False,
+        )

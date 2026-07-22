@@ -1,0 +1,203 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<br>
+
+<div class="container">
+
+    <!--  KPIs -->
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="card p-3 bg-primary text-white">
+                <h5>Total Envíos</h5>
+                <h3>{{ total_envios }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-success text-white">
+                <h5>Ingresos</h5>
+                <h3>$ {{ ingresos }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-warning text-white">
+                <h5>Peso Total</h5>
+                <h3>{{ peso_total }} kg</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-success text-white">
+                <h5>Precio Promedio</h5>
+                <h3>$ {{ precio_promedio }}</h3>
+            </div>
+        </div>
+    </div>
+<!--Fin KPI-->
+
+<!--Graficas-->
+    <br>
+
+    <!--  FILA 1 -->
+    <div class="row">
+
+        <!-- Estado -->
+        <div class="col-md-6">
+            <h4 class="text-center">Pedidos por Estado</h4>
+            <canvas id="grafico_estado"></canvas>
+        </div>
+
+        <!-- Transporte -->
+        <div class="col-md-6">
+            <h4 class="text-center">Envíos por Transporte</h4>
+            <canvas id="grafico_transporte"></canvas>
+        </div>
+
+    </div>
+
+    <br>
+
+    <!--  FILA 2 -->
+    <div class="row">
+
+        <!-- Ingresos por transporte -->
+        <div class="col-md-6">
+            <h4 class="text-center">Ingresos por Transporte</h4>
+            <canvas id="grafico_ingresos_transporte"></canvas>
+        </div>
+
+        <!-- Ciudad -->
+        <div class="col-md-6">
+            <h4 class="text-center">Envíos por Ciudad</h4>
+            <canvas id="grafico_ciudad"></canvas>
+        </div>
+
+    </div>
+
+    <br>
+
+    <!--  FILA 3 -->
+    <div class="row">
+
+        <!-- Envíos por día -->
+        <div class="col-md-6">
+            <h4 class="text-center">Envíos por Día</h4>
+            <canvas id="grafico_dia"></canvas>
+        </div>
+
+        <!-- Ingresos por día -->
+        <div class="col-md-6">
+            <h4 class="text-center">Ingresos por Día</h4>
+            <canvas id="grafico_ingresos_dia"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+    <script>
+    /* 📊 DATOS DESDE DJANGO */
+    const estado_labels = {{ etiquetas_estado|safe }};
+    const estado_data = {{ datos_numero_estado|safe }};
+
+    const transporte_labels = {{ etiquetas_transporte|safe }};
+    const transporte_data = {{ datos_transporte|safe }};
+
+    const ing_trans_labels = {{ etiquetas_ing_trans|safe }};
+    const ing_trans_data = {{ datos_ing_trans|safe }};
+
+    const ciudad_labels = {{ etiquetas_ciudad|safe }};
+    const ciudad_data = {{ datos_ciudad|safe }};
+
+    const dia_labels = {{ etiquetas_dia|safe }};
+    const dia_data = {{ datos_dia|safe }};
+
+    const ing_dia_labels = {{ etiquetas_ing_dia|safe }};
+    const ing_dia_data = {{ datos_ing_dia|safe }};
+
+    /* GRÁFICO ESTADO */
+    new Chart(document.getElementById('grafico_estado'), {
+        type: 'bar',
+        data: {
+            labels: estado_labels,
+            datasets: [{
+                label: 'Pedidos',
+                data: estado_data,
+                backgroundColor: ['#f39c12','#3498db','#2ecc71']
+            }]
+        }
+    });
+
+    /* TRANSPORTE */
+    new Chart(document.getElementById('grafico_transporte'), {
+        type: 'pie',
+        data: {
+            labels: transporte_labels,
+            datasets: [{
+                data: transporte_data,
+                backgroundColor: ['#1abc9c','#e74c3c','#9b59b6']
+            }]
+        }
+    });
+
+    /* INGRESOS TRANSPORTE */
+    new Chart(document.getElementById('grafico_ingresos_transporte'), {
+        type: 'bar',
+        data: {
+            labels: ing_trans_labels,
+            datasets: [{
+                label: 'Ingresos',
+                data: ing_trans_data,
+                backgroundColor: '#2ecc71'
+            }]
+        }
+    });
+
+    /* CIUDAD */
+    new Chart(document.getElementById('grafico_ciudad'), {
+        type: 'bar',
+        data: {
+            labels: ciudad_labels,
+            datasets: [{
+                label: 'Envíos',
+                data: ciudad_data,
+                backgroundColor: '#3498db'
+            }]
+        }
+    });
+
+    /*  ENVÍOS POR DÍA */
+    new Chart(document.getElementById('grafico_dia'), {
+        type: 'line',
+        data: {
+            labels: dia_labels,
+            datasets: [{
+                label: 'Envíos',
+                data: dia_data,
+                borderColor: '#e67e22',
+                fill: false
+            }]
+        }
+    });
+
+    /* INGRESOS POR DÍA */
+    new Chart(document.getElementById('grafico_ingresos_dia'), {
+        type: 'line',
+        data: {
+            labels: ing_dia_labels,
+            datasets: [{
+                label: 'Ingresos',
+                data: ing_dia_data,
+                borderColor: '#27ae60',
+                fill: false
+            }]
+        }
+    });
+</script>
+
+{% endblock %}

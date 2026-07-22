@@ -10,10 +10,11 @@ from datetime import datetime
 from django.utils import timezone
 from django.core.mail import EmailMessage
 # Create your views here.
-
+from django.db.models.functions import TruncDate
 ##Nuevas Librerias para el dashboard
 ##Importaciones para gestionar el Dashboard
 from django.db.models import Sum, Count, Avg
+import json
 
 
 def es_admin(user):
@@ -92,7 +93,102 @@ def detalle_encomienda(request, id):
 def dashboard(request):
     ##KPI1
     ##Total de inventario por categoria
-    return render(request, 'dashboard.html')
+    stock_estado=(
+        Encomienda.objects.values('estado')
+        .annotate(total_estado=Count('estado'))
+        .order_by('-total_estado')
+    )
+
+    transporte_data = (
+    Encomienda.objects.values('transporte')
+    .annotate(total=Count('transporte'))
+    )
+
+    ingresos_transporte = (
+        Encomienda.objects.values('transporte')
+        .annotate(total=Sum('precio'))
+    )
+    envios_ciudad = (
+    Encomienda.objects.values('destino__ciudad')
+    .annotate(total=Count('id'))
+    )
+    envios_dia = (
+    Encomienda.objects
+    .annotate(fecha=TruncDate('fecha_envio'))
+    .values('fecha')
+    .annotate(total=Count('id'))
+    )
+    ingresos_dia = (
+    Encomienda.objects
+    .annotate(fecha=TruncDate('fecha_envio'))
+    .values('fecha')
+    .annotate(total=Sum('precio'))
+    )
+    top_transporte = (
+        Encomienda.objects.values('transporte')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+        .first()
+    )
+
+    ##Extraer en variables los datos que estan en los contenedores  en formato PY
+    ##KPI
+    ingresos = Encomienda.objects.aggregate(total=Sum('precio'))['total']
+    peso_total = Encomienda.objects.aggregate(total=Sum('peso'))['total']
+    precio_promedio = Encomienda.objects.aggregate(avg=Avg('precio'))['avg']
+    total_envios=Encomienda.objects.count()
+    ##Los demas para graficas
+    etiqueta_estado=[item['estado'] for item in stock_estado]
+    datos_numero_estado=[item['total_estado'] for item in stock_estado]
+    etiquetas_transporte = [item['transporte'] for item in transporte_data]
+    datos_transporte = [item['total'] for item in transporte_data]
+    etiquetas_ing_trans = [item['transporte'] for item in ingresos_transporte]
+    datos_ing_trans = [float(item['total'] or 0) for item in ingresos_transporte]
+    etiquetas_ciudad = [item['destino__ciudad'] for item in envios_ciudad]
+    datos_ciudad = [item['total'] for item in envios_ciudad]
+
+    etiquetas_dia = [str(item['fecha']) for item in envios_dia]
+    datos_dia = [item['total'] for item in envios_dia]
+    etiquetas_ing_dia = [str(item['fecha']) for item in ingresos_dia]
+    datos_ing_dia = [float(item['total'] or 0) for item in ingresos_dia]
+
+    ##Pasar a formato JSON
+    contexto={
+        #  KPIs
+        'ingresos': float(ingresos),
+        'peso_total': float(peso_total),
+        'precio_promedio': float(precio_promedio),
+        'etiquetas_estado':json.dumps(etiqueta_estado),
+        'datos_numero_estado':json.dumps(datos_numero_estado),
+        'total_envios':json.dumps(total_envios),
+
+        # 🚚 Transporte
+        'etiquetas_transporte': json.dumps(etiquetas_transporte),
+        'datos_transporte': json.dumps(datos_transporte),
+
+        # 💰 Ingresos transporte
+        'etiquetas_ing_trans': json.dumps(etiquetas_ing_trans),
+        'datos_ing_trans': json.dumps(datos_ing_trans),
+
+        # 🌎 Ciudad
+        'etiquetas_ciudad': json.dumps(etiquetas_ciudad),
+        'datos_ciudad': json.dumps(datos_ciudad),
+
+        # 📅 Día
+        'etiquetas_dia': json.dumps(etiquetas_dia),
+        'datos_dia': json.dumps(datos_dia),
+
+        # 💰 Ingresos día
+        'etiquetas_ing_dia': json.dumps(etiquetas_ing_dia),
+        'datos_ing_dia': json.dumps(datos_ing_dia),
+
+
+
+        # 
+        'top_transporte': top_transporte,
+    }          
+    return render(request, 'dashboard.html',contexto)
+
 
 
 @requiere_admin

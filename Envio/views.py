@@ -401,7 +401,7 @@ def enviar_correo_actualizacion(encomienda):
             f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
             f'Descripción: {encomienda.descripcion}\n'
             f'Estado actual: {encomienda.get_estado_display()}\n'
-            f'Fecha estimada de entrega: {fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Fecha estimada de entrega: {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n' 
             f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema lataexpress.com.\n\n'
             f'Saludos,\nEquipo LataExpress'
         )

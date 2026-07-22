@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Cliente, Destino, Encomienda
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
-## Para añadir los alert bonitos 
+# Para añadir los alert bonitos 
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
@@ -76,7 +76,7 @@ def newencomienda(request):
     return render(request, 'newencomienda.html', {
         'clientes': clientes
     })
-##Para ver detalle de la encomienda mas bonito
+#Para ver detalle de la encomienda mas bonito
 def detalle_encomienda(request, id):
     encomienda = Encomienda.objects.select_related('cliente', 'destino').get(id=id)
 
@@ -86,19 +86,26 @@ def detalle_encomienda(request, id):
 
 @requiere_admin
 def guardar_Cliente(request):
-    nombre_f=request.POST.get('nombre')
-    apellido_f=request.POST.get('apellido')
-    cedula_f=request.POST.get('cedula')
-    email_f=request.POST.get('email')
-    telefono_f=request.POST.get('telefono')
-    cliente_f=Cliente.objects.create(
+    nombre_f = request.POST.get('nombre')
+    apellido_f = request.POST.get('apellido')
+    cedula_f = request.POST.get('cedula')
+    email_f = request.POST.get('email')
+    telefono_f = request.POST.get('telefono')
+
+    if Cliente.objects.filter(cedula=cedula_f).exists():
+        messages.error(request, f'Ya existe un cliente registrado con la cédula {cedula_f}')
+        return render(request, 'newcliente.html', {
+            'datos': request.POST  # le devolvemos lo que ya escribió
+        })
+
+    cliente_f = Cliente.objects.create(
         nombre=nombre_f,
         apellido=apellido_f,
         cedula=cedula_f,
         email=email_f,
         telefono=telefono_f
     )
-    messages.success(request ,f'{cliente_f.nombre } {cliente_f.apellido} ha sido ingresado al sistema correctamente')
+    messages.success(request, f'{cliente_f.nombre} {cliente_f.apellido} ha sido ingresado al sistema correctamente')
     return redirect('/showclientes')
 
 @requiere_admin
@@ -109,18 +116,14 @@ def showclientes(request):
 
 @requiere_admin
 def eliminarcliente(request,id):
-    ##Capturar el ID
-    #El primer parametro id es el de la BDD
-    #El segundo es el que acompaña a request osea la vbaribla
+    ##Capturar el ID, el primer parametro id es el de la BDD y el segundo es el que acompaña a request osea la variable
     clienteElimado=Cliente.objects.get(id=id)
     clienteElimado.delete()
     messages.success(request,f'Cliente {clienteElimado.nombre} {clienteElimado.apellido} eliminado exitosamente')
-    messages.warning(request,"Estas seguro de eliminar")
+    messages.warning(request,"Cliente eliminado exitosamente")
     return redirect('/showclientes')
-##Como eliminar las imagenes e archivos 
 
-
-## Encomiendas y Destinos
+#Encomiendas y Destinos
 
 @requiere_admin
 def showencomiendas(request):
@@ -132,11 +135,11 @@ def showencomiendas(request):
 
 @requiere_admin
 def guardar_encomienda(request):
-    # -------- CLIENTE --------
+    # Cliente
     cliente_id = request.POST.get('cliente')
     cliente = Cliente.objects.get(id=cliente_id)
 
-    # -------- DESTINO + DESTINATARIO --------
+    #Destino y Destinatario
     ciudad_f = request.POST.get('ciudad')
     direccion_f = request.POST.get('direccion')
     codigo_postal_f = request.POST.get('codigo_postal')
@@ -154,7 +157,7 @@ def guardar_encomienda(request):
         email_destinatario=email_destinatario_f,
         telefono_destinatario=telefono_destinatario_f
     )
-    # -------- ENCOMIENDA --------
+    #Encomienda
     descripcion_f = request.POST.get('descripcion')
     peso_f = request.POST.get('peso')
     precio_f = request.POST.get('precio')
@@ -185,13 +188,13 @@ def enviar_correo_encomienda(encomienda):
 
     fecha_estimada = encomienda.fecha_estimada
 
-    # 🔧 Convertir si viene como string
+    #Convertir si viene como string
     if isinstance(fecha_estimada, str):
         try:
             fecha_estimada = datetime.fromisoformat(fecha_estimada)
         except:
             fecha_estimada = datetime.strptime(fecha_estimada, "%Y-%m-%d %H:%M:%S")
-    # -------- Correo para el CLIENTE (remitente) --------
+    #Correo para el cliente (remitente)
     if encomienda.cliente.email:
         mensaje_cliente = (
             f'Hola {encomienda.cliente.nombre} {encomienda.cliente.apellido},\n\n'
@@ -212,7 +215,7 @@ def enviar_correo_encomienda(encomienda):
             to=[encomienda.cliente.email],
         ).send()
 
-    # -------- Correo para el DESTINATARIO --------
+    #Correo para el destinatario
     if encomienda.destino.email_destinatario:
         mensaje_destinatario = (
             f'Hola {encomienda.destino.nombre_destinatario},\n\n'
@@ -262,16 +265,14 @@ def rastrear_encomienda(request):
         buscado = True
 
         try:
-            # Busca por coincidencia parcial del UUID (ya que el cliente
-            # solo tiene el código corto tipo LE-A3F8B2C1)
+            # Busca por coincidencia parcial del UUID
             encomienda = Encomienda.objects.select_related('cliente', 'destino').get(
                 codigo__istartswith=codigo_ingresado.replace('LE-', '').replace('LE', '')
             )
         except Encomienda.DoesNotExist:
             encomienda = None
         except Encomienda.MultipleObjectsReturned:
-            # Si el código corto coincide con más de una encomienda,
-            # toma la primera coincidencia
+            # Si el código corto coincide con más de una encomienda,toma la primera coincidencia
             encomienda = Encomienda.objects.select_related('cliente', 'destino').filter(
                 codigo__istartswith=codigo_ingresado.replace('LE-', '').replace('LE', '')
             ).first()
@@ -280,7 +281,6 @@ def rastrear_encomienda(request):
         'encomienda': encomienda,
         'buscado': buscado
     })
-
 
 #Edición de Cliente
 
@@ -385,8 +385,7 @@ def actualizar_estados(request):
 
 def enviar_correo_actualizacion(encomienda):
 
-
-    # -------- Correo para el CLIENTE (remitente) --------
+    # Correo para el cliente (remitente)
     if encomienda.cliente.email:
         asunto_cliente = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
         mensaje_cliente = (
@@ -410,7 +409,7 @@ def enviar_correo_actualizacion(encomienda):
             fail_silently=False,
         )
 
-    # -------- Correo para el DESTINATARIO --------
+    #Correo para el destinatario
     if encomienda.destino.email_destinatario:
         asunto_destinatario = f'Actualización de tu envío LE-{str(encomienda.codigo)}'
         mensaje_destinatario = (

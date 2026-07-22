@@ -372,18 +372,18 @@
     }
   </script>
 
-  <!--Agreagar con JINJA para el mensaje de respuesta-->
-  {%if messages%}
-    {%for mensaje in messages%}
-        <script> 
-            Swal.fire({
-                title: "Confirmacion",
-                text: "{{mensaje}}",
-                icon: "success",
-            });   
+<!--Agregar con JINJA para el mensaje de respuesta-->
+{% if messages %}
+    {% for mensaje in messages %}
+        <script>
+        Swal.fire({
+            title: "{% if mensaje.tags == 'error' %}Error{% elif mensaje.tags == 'warning' %}Atención{% else %}Confirmación{% endif %}",
+            text: "{{ mensaje }}",
+            icon: "{% if mensaje.tags == 'error' %}error{% elif mensaje.tags == 'warning' %}warning{% else %}success{% endif %}",
+        });
         </script>
-    {%endfor%}
-  {%endif%}
+    {% endfor %}
+{% endif %}
     
 </body>
 </html>

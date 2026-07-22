@@ -17,33 +17,22 @@ method="post"
 id="form_editar_cliente">
 
                 {% csrf_token %}
-
-<!-- Nombres -->
                 <b>Nombre:</b><br>
                 <input class="form-control" type="text" name="nombre" value="{{ cliente.nombre }}" required>
                 <br>
-<!-- Apellidos -->
                 <b>Apellido:</b><br>
                 <input class="form-control" type="text" name="apellido" value="{{ cliente.apellido }}" required>
                 <br>
-
-<!-- Cédula -->
                 <b>Cédula:</b><br>
                 <input class="form-control" type="text" name="cedula" value="{{ cliente.cedula }}" required>
                 <br>
-
-<!-- Email -->
                 <b>Email:</b><br>
                 <input class="form-control" type="email" name="email" value="{{ cliente.email }}" required>
                 <br>
-
-<!-- Teléfono -->
                 <b>Teléfono:</b><br>
                 <input class="form-control" type="text" name="telefono" value="{{ cliente.telefono }}" required>
                 <br>
                 <br><br>
-
-<!-- BOTONES -->
                 <div class="text-center">
                     <button class="btn btn-success" type="submit">
                         <i class="bi bi-check-circle"></i> Actualizar
@@ -61,60 +50,115 @@ id="form_editar_cliente">
     </div>
 </div>
 <script>
-        //validaciones para formularios
-        $('#form_editar_cliente').validate(
-                {
-        rules:{
-        nombre:{
-        required:true,
-        minlength:3,
-        maxlength:20
-                        },
-        apellido:{
-        required:true,
-        minlengh:5,
-        maxlength:20
+// Método personalizado: solo letras y espacios (incluye tildes y ñ)
+$.validator.addMethod("soloLetras", function(value, element) {
+    return this.optional(element) || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value);
+}, "Este campo solo debe contener letras");
 
-                        },
-        cedula:{
-        required:true,
-        maxlength:10
-                        },
-        email:{
-        required:true,
-        typeof:"email"
-                        },
-        telefono:{
-        required:true,
-        maxlength:10
-                        }
-                    },
-        messages:{
-        nombre:{
-        required:"Ingrese el nombre del cliente",
-        minlength:"El nombre debe contener al menos 3 caracteres",
-        maxlength:"El Nombre no debe sobrepasar 20 Caracteres"
-                        },
-        apellido:{
-        required:"Ingrese el apellido del cliente",
-        minlength:"El apellido debe contener al menos 5 caracteres",
-        maxlength:"El Apellido no debe sobrepasar 20 Caracteres"
-                        },
-        cedula:{
-        required:"Ingrese la cédula del cliente",
-        maxlength:"No debe Exceder los 10 caracteres Ecuatorianos"
-                        },
-        email:{
-        required:"Ingrese el email del cliente",
-        typeof:"Ingrese un email valido"
-                        },
-        telefono:{
-        required:"Ingrese el teléfono del cliente",
-        maxlength:"No debe exceder los 10 caracteres Ecuatorianos"
-                        }
-                    }
+// Validación para cédula ecuatoriana
+$.validator.addMethod("cedulaEC", function(value, element){
+
+        if (!/^\d{10}$/.test(value)){
+            return false;
+        }
+
+        let provincia = parseInt(value.substring(0,2));
+        let tercerDigito = parseInt(value.charAt(2));
+
+        if(provincia < 1 || provincia > 24 || tercerDigito >= 6){
+            return false;
+        }
+
+        let suma = 0;
+
+        for(let i=0; i<9; i++){
+            let num = parseInt(value.charAt(i));
+
+            if(i % 2 == 0){
+                num *= 2;
+                if(num > 9){
+                    num -= 9;
                 }
-            );
+            }
+
+            suma += num;
+        }
+
+        let decena = Math.ceil(suma / 10) * 10;
+        let digitoVerificador = decena - suma;
+
+        if(digitoVerificador == 10){
+            digitoVerificador = 0;
+        }
+
+        return digitoVerificador == parseInt(value.charAt(9));
+
+    }, "Ingrese una cédula ecuatoriana válida.");
+
+$('#form_editar_cliente').validate({
+    rules: {
+        nombre: {
+            required: true,
+            minlength: 3,
+            maxlength: 20,
+            soloLetras: true
+        },
+        apellido: {
+            required: true,
+            minlength: 5,
+            maxlength: 20,
+            soloLetras: true
+        },
+        cedula: {
+            required: true,
+            digits: true,
+            minlength: 10,
+            maxlength: 10,
+            cedulaEC: true
+        },
+        email: {
+            required: true,
+            email: true
+        },
+        telefono: {
+            required: true,
+            digits: true,
+            minlength: 10,
+            maxlength: 10
+        }
+    },
+    messages: {
+        nombre: {
+            required: "Ingrese el nombre del cliente",
+            minlength: "El nombre debe contener al menos 3 caracteres",
+            maxlength: "El nombre no debe sobrepasar 20 caracteres",
+            soloLetras: "El nombre no debe contener números ni símbolos"
+        },
+        apellido: {
+            required: "Ingrese el apellido del cliente",
+            minlength: "El apellido debe contener al menos 5 caracteres",
+            maxlength: "El apellido no debe sobrepasar 20 caracteres",
+            soloLetras: "El apellido no debe contener números ni símbolos"
+        },
+        cedula: {
+            required: "Ingrese la cédula del cliente",
+            digits: "La cédula solo debe contener números",
+            minlength: "La cédula debe tener 10 dígitos",
+            maxlength: "La cédula debe tener 10 dígitos",
+            cedulaEC: "Ingrese una cédula válida"
+        },
+        email: {
+            required: "Ingrese el email del cliente",
+            email: "Ingrese un email válido"
+        },
+        telefono: {
+            required: "Ingrese el teléfono del cliente",
+            digits: "El teléfono solo debe contener números",
+            minlength: "El teléfono debe tener 10 dígitos",
+            maxlength: "El teléfono debe tener 10 dígitos"
+        }
+    }
+});
 </script>
 
 

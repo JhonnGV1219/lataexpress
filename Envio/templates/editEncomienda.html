@@ -12,7 +12,7 @@
             <form action="/actualizar_encomienda/{{ encomienda.id }}/" method="post" id="form_editar_encomienda">
                 {% csrf_token %}
 
-                <!-- ===== CLIENTE ===== -->
+                <!-- Cliente -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <b><i class="bi bi-person-fill"></i> Cliente</b>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
 
-                <!-- ===== DESTINO ===== -->
+                <!-- Destino -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <b><i class="bi bi-geo-alt-fill"></i> Destino</b>
@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <!-- ===== DESTINATARIO ===== -->
+                <!-- Destinatario -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <b><i class="bi bi-person-badge-fill"></i> Destinatario</b>
@@ -84,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- ===== PAQUETE ===== -->
+                <!-- Paquete -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <b><i class="bi bi-box-seam-fill"></i> Datos del paquete</b>
@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- ===== LOGÍSTICA ===== -->
+                <!-- Logística -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <b><i class="bi bi-truck"></i> Logística</b>
@@ -137,8 +137,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- BOTONES -->
                 <div class="text-center mb-4">
                     <button class="btn btn-success px-4" type="submit">
                         <i class="bi bi-save-fill"></i> Actualizar Encomienda

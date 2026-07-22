@@ -159,15 +159,18 @@
 <script>
 $(document).ready(function () {
 
-    let manana = new Date();
-    manana.setDate(manana.getDate() + 1);
+    let fechaMin = new Date();
+    fechaMin.setHours(fechaMin.getHours() + 5);
 
-    manana.setMinutes(manana.getMinutes() - manana.getTimezoneOffset());
+    let fechaMax = new Date();
+    fechaMax.setHours(fechaMax.getHours() + 72);
 
-    $("input[name='fecha_estimada']").attr(
-        "min",
-        manana.toISOString().slice(0,16)
-    );
+    fechaMin.setMinutes(fechaMin.getMinutes() - fechaMin.getTimezoneOffset());
+    fechaMax.setMinutes(fechaMax.getMinutes() - fechaMax.getTimezoneOffset());
+
+    $("input[name='fecha_estimada']")
+        .attr("min", fechaMin.toISOString().slice(0,16))
+        .attr("max", fechaMax.toISOString().slice(0,16));
 
     $.validator.addMethod("soloLetras", function (value, element) {
         return this.optional(element) || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value);
@@ -218,16 +221,19 @@ $(document).ready(function () {
 
     }, "Ingrese una cédula ecuatoriana válida.");
 
-    $.validator.addMethod("fechaManana", function(value, element){
+    $.validator.addMethod("tiempoEntrega", function(value, element){
 
         let fechaSeleccionada = new Date(value);
-        let manana = new Date();
-        manana.setDate(manana.getDate() + 1);
-        manana.setHours(0,0,0,0);
 
-        return fechaSeleccionada >= manana;
+        let fechaMin = new Date();
+        fechaMin.setHours(fechaMin.getHours() + 5);
 
-    }, "La fecha debe ser desde mañana.");
+        let fechaMax = new Date();
+        fechaMax.setHours(fechaMax.getHours() + 72);
+
+        return fechaSeleccionada >= fechaMin && fechaSeleccionada <= fechaMax;
+
+    }, "El tiempo estimado debe estar entre 5 y 72 horas.");
 
     $("#form_nueva_encomienda").validate({
         rules:{
@@ -308,7 +314,7 @@ $(document).ready(function () {
 
             fecha_estimada:{
                 required:true,
-                fechaManana:true
+                tiempoEntrega:true
             }
         },
         messages:{
@@ -390,7 +396,7 @@ $(document).ready(function () {
 
             fecha_estimada:{
                 required:"Seleccione la fecha estimada.",
-                fechaManana:"La fecha debe ser desde mañana."
+                tiempoEntrega:"El tiempo estimado debe estar entre 5 y 72 horas."
             }
         },
 

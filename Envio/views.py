@@ -163,7 +163,12 @@ def guardar_encomienda(request):
     precio_f = request.POST.get('precio')
     estado_f = request.POST.get('estado')
     transporte_f = request.POST.get('transporte')
-    fecha_estimada_f = request.POST.get('fecha_estimada')
+    fecha_estimada_str = request.POST.get('fecha_estimada')
+    fecha_estimada_dt = datetime.strptime(
+        fecha_estimada_str,
+        '%Y-%m-%dT%H:%M'
+    )
+    fecha_estimada_f = timezone.make_aware(fecha_estimada_dt)
 
     encomienda_f = Encomienda.objects.create(
         cliente=cliente,
@@ -204,7 +209,7 @@ def enviar_correo_encomienda(encomienda):
             f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
             f'Descripción: {encomienda.descripcion}\n'
             f'Estado actual: {encomienda.get_estado_display()}\n'
-            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Fecha estimada de entrega: {fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
             f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
             f'Saludos,\nEquipo LataExpress'
         )
@@ -219,13 +224,13 @@ def enviar_correo_encomienda(encomienda):
     if encomienda.destino.email_destinatario:
         mensaje_destinatario = (
             f'Hola {encomienda.destino.nombre_destinatario},\n\n'
-            f'Se ha registrado tu correo como destinatario de una encomienda de LataExpress.\n\n'
+            f'Se ha actualizado la encomienda de la cual eres destinatario en LataExpress.\n\n'
             f'Código de rastreo: LE-{str(encomienda.codigo)}\n'
             f'Cliente remitente: {encomienda.cliente.nombre} {encomienda.cliente.apellido}\n'
             f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
             f'Descripción: {encomienda.descripcion}\n'
             f'Estado actual: {encomienda.get_estado_display()}\n'
-            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Fecha estimada de entrega: {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
             f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
             f'Saludos,\nEquipo LataExpress'
         )
@@ -396,7 +401,7 @@ def enviar_correo_actualizacion(encomienda):
             f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
             f'Descripción: {encomienda.descripcion}\n'
             f'Estado actual: {encomienda.get_estado_display()}\n'
-            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Fecha estimada de entrega: {fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
             f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
             f'Saludos,\nEquipo LataExpress'
         )
@@ -420,7 +425,7 @@ def enviar_correo_actualizacion(encomienda):
             f'Destino: {encomienda.destino.ciudad} - {encomienda.destino.direccion}\n'
             f'Descripción: {encomienda.descripcion}\n'
             f'Estado actual: {encomienda.get_estado_display()}\n'
-            f'Fecha estimada de entrega:  {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
+            f'Fecha estimada de entrega: {encomienda.fecha_estimada.strftime("%d/%m/%Y %H:%M")}\n\n'
             f'Puedes rastrear tu encomienda ingresando el código en nuestro sistema.\n\n'
             f'Saludos,\nEquipo LataExpress'
         )

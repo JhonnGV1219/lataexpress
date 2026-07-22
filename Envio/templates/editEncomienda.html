@@ -156,12 +156,18 @@
 <script>
 $(document).ready(function () {
 
-    let manana = new Date();
-        manana.setDate(manana.getDate() + 1);
+    let fechaMin = new Date();
+        fechaMin.setHours(fechaMin.getHours() + 5);
 
-        manana.setMinutes(manana.getMinutes() - manana.getTimezoneOffset());
+        let fechaMax = new Date();
+        fechaMax.setHours(fechaMax.getHours() + 72);
 
-        $("#fecha_estimada").attr("min", manana.toISOString().slice(0,16));
+        fechaMin.setMinutes(fechaMin.getMinutes() - fechaMin.getTimezoneOffset());
+        fechaMax.setMinutes(fechaMax.getMinutes() - fechaMax.getTimezoneOffset());
+
+        $("#fecha_estimada")
+            .attr("min", fechaMin.toISOString().slice(0,16))
+            .attr("max", fechaMax.toISOString().slice(0,16));
 
     $.validator.addMethod("soloLetras", function (value, element) {
         return this.optional(element) || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value);
@@ -209,17 +215,21 @@ $(document).ready(function () {
         return digitoVerificador == parseInt(value.charAt(9));
 
     }, "Ingrese una cédula ecuatoriana válida.");
-    $.validator.addMethod("fechaManana", function(value, element){
+
+    $.validator.addMethod("tiempoEntrega", function(value, element){
 
         let fechaSeleccionada = new Date(value);
 
-        let manana = new Date();
-        manana.setDate(manana.getDate() + 1);
-        manana.setHours(0,0,0,0);
+        let fechaMin = new Date();
+        fechaMin.setHours(fechaMin.getHours() + 5);
 
-        return fechaSeleccionada >= manana;
+        let fechaMax = new Date();
+        fechaMax.setHours(fechaMax.getHours() + 72);
 
-    }, "La fecha estimada debe ser a partir de mañana.");
+        return fechaSeleccionada >= fechaMin &&
+            fechaSeleccionada <= fechaMax;
+
+    }, "El tiempo estimado debe estar entre 5 y 72 horas.");
 
 
     $("#form_editar_encomienda").validate({
@@ -247,7 +257,7 @@ $(document).ready(function () {
             direccion:{
                 required:true,
                 minlength:5,
-                maxlength:100
+                maxlength:30
             },
 
             nombre_destinatario:{
@@ -303,7 +313,7 @@ $(document).ready(function () {
 
             fecha_estimada:{
                 required:true,
-                fechaManana:true
+                tiempoEntrega:true
             }
 
         },
@@ -387,7 +397,7 @@ $(document).ready(function () {
 
             fecha_estimada:{
                 required:"Seleccione la fecha estimada.",
-                fechaManana:"La fecha estimada debe ser desde el día de mañana."
+                tiempoEntrega:"El tiempo estimado debe estar entre 5 y 72 horas."
             }
 
         },

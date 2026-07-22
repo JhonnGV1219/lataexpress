@@ -1,0 +1,93 @@
+{% extends "./plantillaPrincipal.html" %}
+{% load static %}
+{% block contenido %}
+
+<section class="about-section spad">
+    <div class="container">
+
+        <div class="row mb-5">
+            <div class="col-lg-12 text-center">
+                <h2 class="fw-bold">Sobre Nosotros</h2>
+                <p class="text-muted">
+                    Conectamos personas y negocios mediante un servicio de encomiendas
+                    rápido, seguro y confiable.
+                </p>
+            </div>
+        </div>
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-6">
+                <img src="{% static 'assets/img/logo/logoLATAEXPRESS2.png' %}" class="img-fluid rounded shadow" alt="Sobre Nosotros">
+            </div>
+
+            <div class="col-lg-6">
+                <h3 class="mb-3">¿Quiénes Somos?</h3>
+
+                <p style="text-align: justify;">
+                    <strong>LataExpress</strong> es una plataforma desarrollada como
+                    proyecto académico de la Universidad Técnica de Cotopaxi (UTC),
+                    inspirada en las necesidades de transporte y gestión de encomiendas
+                    de la ciudad de Latacunga. Nuestro objetivo es brindar una solución
+                    tecnológica que facilite el registro, seguimiento y administración
+                    de envíos de manera rápida, eficiente y segura.
+                </p>
+
+                <p style="text-align: justify;">
+                    La plataforma permite gestionar clientes, registrar encomiendas,
+                    controlar destinos y ofrecer un seguimiento organizado de cada envío,
+                    mejorando la experiencia tanto para los usuarios como para los
+                    administradores del sistema.
+                </p>
+
+            </div>
+
+        </div>
+
+        <hr class="my-5">
+
+        <div class="row">
+
+            <div class="col-md-4 text-center">
+                <div class="p-4 shadow rounded h-100">
+                    <h3 class="text-warning">Misión</h3>
+                    <p>
+                        Ofrecer un servicio eficiente para la gestión de encomiendas,
+                        garantizando seguridad, rapidez y confianza mediante el uso de
+                        herramientas tecnológicas.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <div class="p-4 shadow rounded h-100">
+                    <h3 class="text-warning">Visión</h3>
+                    <p>
+                        Ser una plataforma de referencia para la administración de
+                        encomiendas, destacando por su innovación, calidad y facilidad
+                        de uso.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <div class="p-4 shadow rounded h-100">
+                    <h3 class="text-warning">Valores</h3>
+
+                    <ul class="list-unstyled">
+                        <li>✔ Responsabilidad</li>
+                        <li>✔ Honestidad</li>
+                        <li>✔ Compromiso</li>
+                        <li>✔ Seguridad</li>
+                        <li>✔ Calidad en el servicio</li>
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

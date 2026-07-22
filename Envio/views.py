@@ -433,3 +433,6 @@ def enviar_correo_actualizacion(encomienda):
             [encomienda.destino.email_destinatario],
             fail_silently=False,
         )
+
+def about(request):
+    return render(request, 'about.html')

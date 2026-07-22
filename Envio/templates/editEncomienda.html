@@ -157,17 +157,17 @@
 $(document).ready(function () {
 
     let fechaMin = new Date();
-        fechaMin.setHours(fechaMin.getHours() + 5);
+    fechaMin.setHours(fechaMin.getHours() + 5);
 
-        let fechaMax = new Date();
-        fechaMax.setHours(fechaMax.getHours() + 72);
+    let fechaMax = new Date();
+    fechaMax.setHours(fechaMax.getHours() + 72);
 
-        fechaMin.setMinutes(fechaMin.getMinutes() - fechaMin.getTimezoneOffset());
-        fechaMax.setMinutes(fechaMax.getMinutes() - fechaMax.getTimezoneOffset());
+    fechaMin.setMinutes(fechaMin.getMinutes() - fechaMin.getTimezoneOffset());
+    fechaMax.setMinutes(fechaMax.getMinutes() - fechaMax.getTimezoneOffset());
 
-        $("#fecha_estimada")
-            .attr("min", fechaMin.toISOString().slice(0,16))
-            .attr("max", fechaMax.toISOString().slice(0,16));
+    $("input[name='fecha_estimada']")
+        .attr("min", fechaMin.toISOString().slice(0,16))
+        .attr("max", fechaMax.toISOString().slice(0,16));
 
     $.validator.addMethod("soloLetras", function (value, element) {
         return this.optional(element) || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value);
@@ -179,7 +179,7 @@ $(document).ready(function () {
 
     $.validator.addMethod("cedulaEC", function(value, element){
 
-        if (!/^\d{10}$/.test(value)){
+        if(!/^\d{10}$/.test(value)){
             return false;
         }
 
@@ -192,7 +192,8 @@ $(document).ready(function () {
 
         let suma = 0;
 
-        for(let i=0; i<9; i++){
+        for(let i = 0; i < 9; i++){
+
             let num = parseInt(value.charAt(i));
 
             if(i % 2 == 0){
@@ -203,6 +204,7 @@ $(document).ready(function () {
             }
 
             suma += num;
+
         }
 
         let decena = Math.ceil(suma / 10) * 10;
@@ -214,7 +216,7 @@ $(document).ready(function () {
 
         return digitoVerificador == parseInt(value.charAt(9));
 
-    }, "Ingrese una cédula ecuatoriana válida.");
+    }, "Ingrese una cédula válida.");
 
     $.validator.addMethod("tiempoEntrega", function(value, element){
 
@@ -226,16 +228,12 @@ $(document).ready(function () {
         let fechaMax = new Date();
         fechaMax.setHours(fechaMax.getHours() + 72);
 
-        return fechaSeleccionada >= fechaMin &&
-            fechaSeleccionada <= fechaMax;
+        return fechaSeleccionada >= fechaMin && fechaSeleccionada <= fechaMax;
 
     }, "El tiempo estimado debe estar entre 5 y 72 horas.");
 
-
-    $("#form_editar_encomienda").validate({
-
+    $("#form_nueva_encomienda").validate({
         rules:{
-
             cliente:{
                 required:true
             },
@@ -257,7 +255,7 @@ $(document).ready(function () {
             direccion:{
                 required:true,
                 minlength:5,
-                maxlength:30
+                maxlength:100
             },
 
             nombre_destinatario:{
@@ -315,9 +313,7 @@ $(document).ready(function () {
                 required:true,
                 tiempoEntrega:true
             }
-
         },
-
         messages:{
 
             cliente:{
@@ -326,7 +322,7 @@ $(document).ready(function () {
 
             ciudad:{
                 required:"Ingrese la ciudad.",
-                minlength:"Debe tener al menos 3 caracteres.",
+                minlength:"Debe tener mínimo 3 caracteres.",
                 maxlength:"No debe superar los 30 caracteres.",
                 soloLetras:"Solo se permiten letras."
             },
@@ -334,19 +330,19 @@ $(document).ready(function () {
             codigo_postal:{
                 required:"Ingrese el código postal.",
                 soloNumeros:"Solo se permiten números.",
-                minlength:"Debe tener al menos 4 dígitos.",
+                minlength:"Debe tener mínimo 4 dígitos.",
                 maxlength:"No debe superar los 6 dígitos."
             },
 
             direccion:{
                 required:"Ingrese la dirección.",
-                minlength:"Debe tener al menos 5 caracteres.",
-                maxlength:"No debe superar los 30 caracteres."
+                minlength:"Debe tener mínimo 5 caracteres.",
+                maxlength:"No debe superar los 100 caracteres."
             },
 
             nombre_destinatario:{
                 required:"Ingrese el nombre del destinatario.",
-                minlength:"Debe tener al menos 3 caracteres.",
+                minlength:"Debe tener mínimo 3 caracteres.",
                 maxlength:"No debe superar los 30 caracteres.",
                 soloLetras:"Solo se permiten letras."
             },
@@ -367,28 +363,28 @@ $(document).ready(function () {
             telefono_destinatario:{
                 required:"Ingrese el teléfono.",
                 soloNumeros:"Solo se permiten números.",
-                minlength:"El teléfono debe tener 10 dígitos.",
-                maxlength:"El teléfono debe tener 10 dígitos."
+                minlength:"Debe tener 10 dígitos.",
+                maxlength:"Debe tener 10 dígitos."
             },
 
             descripcion:{
                 required:"Ingrese la descripción.",
-                minlength:"Debe tener al menos 5 caracteres.",
+                minlength:"Debe tener mínimo 5 caracteres.",
                 maxlength:"No debe superar los 200 caracteres."
             },
 
             peso:{
                 required:"Ingrese el peso.",
-                number:"Ingrese un valor numérico.",
-                min:"El peso debe ser mayor a 0.",
-                max:"El peso no debe superar los 150 kg."
+                number:"Ingrese un número válido.",
+                min:"Debe ser mayor a 0.",
+                max:"No puede superar los 150 kg."
             },
 
             precio:{
                 required:"Ingrese el precio.",
-                number:"Ingrese un valor numérico.",
-                min:"El precio debe ser mayor a 0.",
-                max:"El precio no debe superar los 1000 dólares."
+                number:"Ingrese un número válido.",
+                min:"Debe ser mayor a 0.",
+                max:"No puede superar los 1000 dólares."
             },
 
             transporte:{
@@ -399,22 +395,22 @@ $(document).ready(function () {
                 required:"Seleccione la fecha estimada.",
                 tiempoEntrega:"El tiempo estimado debe estar entre 5 y 72 horas."
             }
-
         },
 
         errorClass:"text-danger",
 
         highlight:function(element){
             $(element).addClass("is-invalid");
+
         },
 
         unhighlight:function(element){
             $(element).removeClass("is-invalid");
             $(element).addClass("is-valid");
+
         }
 
     });
-
 });
 </script>
 

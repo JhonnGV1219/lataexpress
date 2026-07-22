@@ -9,7 +9,7 @@
             <h2 class="fw-bold text-center mb-1">Editar Encomienda</h2>
             <p class="text-muted text-center mb-4">Actualiza los datos del envío</p>
 
-            <form action="/actualizar_encomienda/{{ encomienda.id }}/" method="post">
+            <form action="/actualizar_encomienda/{{ encomienda.id }}/" method="post" id="form_editar_encomienda">
                 {% csrf_token %}
 
                 <!-- ===== CLIENTE ===== -->
@@ -132,7 +132,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label"><b>Fecha estimada</b></label>
-                                <input type="datetime-local" name="fecha_estimada" class="form-control" value="{{ encomienda.fecha_estimada|date:'Y-m-d\TH:i' }}" required>
+                                <input type="datetime-local" name="fecha_estimada" id="fecha_estimada" class="form-control" value="{{ encomienda.fecha_estimada|date:'Y-m-d\TH:i' }}" required>
                             </div>
                         </div>
                     </div>
@@ -154,5 +154,260 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function () {
+
+    let manana = new Date();
+        manana.setDate(manana.getDate() + 1);
+
+        manana.setMinutes(manana.getMinutes() - manana.getTimezoneOffset());
+
+        $("#fecha_estimada").attr("min", manana.toISOString().slice(0,16));
+
+    $.validator.addMethod("soloLetras", function (value, element) {
+        return this.optional(element) || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value);
+    }, "Solo se permiten letras.");
+
+    $.validator.addMethod("soloNumeros", function (value, element) {
+        return this.optional(element) || /^[0-9]+$/.test(value);
+    }, "Solo se permiten números.");
+
+    $.validator.addMethod("cedulaEC", function(value, element){
+
+        if (!/^\d{10}$/.test(value)){
+            return false;
+        }
+
+        let provincia = parseInt(value.substring(0,2));
+        let tercerDigito = parseInt(value.charAt(2));
+
+        if(provincia < 1 || provincia > 24 || tercerDigito >= 6){
+            return false;
+        }
+
+        let suma = 0;
+
+        for(let i=0; i<9; i++){
+            let num = parseInt(value.charAt(i));
+
+            if(i % 2 == 0){
+                num *= 2;
+                if(num > 9){
+                    num -= 9;
+                }
+            }
+
+            suma += num;
+        }
+
+        let decena = Math.ceil(suma / 10) * 10;
+        let digitoVerificador = decena - suma;
+
+        if(digitoVerificador == 10){
+            digitoVerificador = 0;
+        }
+
+        return digitoVerificador == parseInt(value.charAt(9));
+
+    }, "Ingrese una cédula ecuatoriana válida.");
+    $.validator.addMethod("fechaManana", function(value, element){
+
+        let fechaSeleccionada = new Date(value);
+
+        let manana = new Date();
+        manana.setDate(manana.getDate() + 1);
+        manana.setHours(0,0,0,0);
+
+        return fechaSeleccionada >= manana;
+
+    }, "La fecha estimada debe ser a partir de mañana.");
+
+
+    $("#form_editar_encomienda").validate({
+
+        rules:{
+
+            cliente:{
+                required:true
+            },
+
+            ciudad:{
+                required:true,
+                minlength:3,
+                maxlength:30,
+                soloLetras:true
+            },
+
+            codigo_postal:{
+                required:true,
+                soloNumeros:true,
+                minlength:4,
+                maxlength:6
+            },
+
+            direccion:{
+                required:true,
+                minlength:5,
+                maxlength:100
+            },
+
+            nombre_destinatario:{
+                required:true,
+                minlength:3,
+                maxlength:30,
+                soloLetras:true
+            },
+
+            cedula_destinatario:{
+                required:true,
+                soloNumeros:true,
+                minlength:10,
+                maxlength:10,
+                cedulaEC:true
+            },
+
+            email_destinatario:{
+                required:true,
+                email:true
+            },
+
+            telefono_destinatario:{
+                required:true,
+                soloNumeros:true,
+                minlength:10,
+                maxlength:10
+            },
+
+            descripcion:{
+                required:true,
+                minlength:5,
+                maxlength:200
+            },
+
+            peso:{
+                required:true,
+                number:true,
+                min:0.01,
+                max:150
+            },
+
+            precio:{
+                required:true,
+                number:true,
+                min:0.01,
+                max:1000
+            },
+
+            transporte:{
+                required:true
+            },
+
+            fecha_estimada:{
+                required:true,
+                fechaManana:true
+            }
+
+        },
+
+        messages:{
+
+            cliente:{
+                required:"Seleccione un cliente."
+            },
+
+            ciudad:{
+                required:"Ingrese la ciudad.",
+                minlength:"Debe tener al menos 3 caracteres.",
+                maxlength:"No debe superar los 30 caracteres.",
+                soloLetras:"Solo se permiten letras."
+            },
+
+            codigo_postal:{
+                required:"Ingrese el código postal.",
+                soloNumeros:"Solo se permiten números.",
+                minlength:"Debe tener al menos 4 dígitos.",
+                maxlength:"No debe superar los 6 dígitos."
+            },
+
+            direccion:{
+                required:"Ingrese la dirección.",
+                minlength:"Debe tener al menos 5 caracteres.",
+                maxlength:"No debe superar los 30 caracteres."
+            },
+
+            nombre_destinatario:{
+                required:"Ingrese el nombre del destinatario.",
+                minlength:"Debe tener al menos 3 caracteres.",
+                maxlength:"No debe superar los 30 caracteres.",
+                soloLetras:"Solo se permiten letras."
+            },
+
+            cedula_destinatario:{
+                required:"Ingrese la cédula.",
+                soloNumeros:"Solo se permiten números.",
+                minlength:"La cédula debe tener 10 dígitos.",
+                maxlength:"La cédula debe tener 10 dígitos.",
+                cedulaEC:"La cédula ecuatoriana no es válida."
+            },
+
+            email_destinatario:{
+                required:"Ingrese el correo electrónico.",
+                email:"Ingrese un correo válido."
+            },
+
+            telefono_destinatario:{
+                required:"Ingrese el teléfono.",
+                soloNumeros:"Solo se permiten números.",
+                minlength:"El teléfono debe tener 10 dígitos.",
+                maxlength:"El teléfono debe tener 10 dígitos."
+            },
+
+            descripcion:{
+                required:"Ingrese la descripción.",
+                minlength:"Debe tener al menos 5 caracteres.",
+                maxlength:"No debe superar los 200 caracteres."
+            },
+
+            peso:{
+                required:"Ingrese el peso.",
+                number:"Ingrese un valor numérico.",
+                min:"El peso debe ser mayor a 0.",
+                max:"El peso no debe superar los 150 kg."
+            },
+
+            precio:{
+                required:"Ingrese el precio.",
+                number:"Ingrese un valor numérico.",
+                min:"El precio debe ser mayor a 0.",
+                max:"El precio no debe superar los 1000 dólares."
+            },
+
+            transporte:{
+                required:"Seleccione el transporte."
+            },
+
+            fecha_estimada:{
+                required:"Seleccione la fecha estimada.",
+                fechaManana:"La fecha estimada debe ser desde el día de mañana."
+            }
+
+        },
+
+        errorClass:"text-danger",
+
+        highlight:function(element){
+            $(element).addClass("is-invalid");
+        },
+
+        unhighlight:function(element){
+            $(element).removeClass("is-invalid");
+            $(element).addClass("is-valid");
+        }
+
+    });
+
+});
+</script>
 
 {% endblock %}

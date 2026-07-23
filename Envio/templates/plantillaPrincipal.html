@@ -152,6 +152,7 @@
                                             {% if user.is_authenticated %}
                                                 {% if user.is_superuser %}
                                                     <li><a href="/showclientes/">Asociados</a></li>
+                                                    <li><a href="/dashboard/">Estadísticas</a></li>
                                                 {% else %}
                                                     {% for group in user.groups.all %}
                                                         {% if group.name == 'admin' %}
